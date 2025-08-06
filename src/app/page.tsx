@@ -11,6 +11,7 @@ export default function Home() {
       <section className="snap-start min-h-screen flex flex-col justify-center items-center bg-charcoal px-4 md:px-8">
         <FeaturesSection />
       </section>
+    
     </main>
   );
 }

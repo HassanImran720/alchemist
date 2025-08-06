@@ -10,7 +10,7 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = "AICHEMIST" }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="w-full bg-charcoal text-ivory border-b border-neutral px-4 sm:px-6 py-3">
+    <nav className="w-full bg-charcoal text-ivory px-4 sm:px-6 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-2">
