@@ -24,11 +24,11 @@ const PricingSection: React.FC<PricingSectionProps> = ({ plans }) => {
   const getPeriod = () => (billing === 'yearly' ? '/month (billed yearly)' : '/month');
 
   return (
-    <section className="w-full bg-charcoal py-8 px-2sm:px-4 flex flex-col items-center">
-      <h2 className="text-beige font-heading text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center">
+    <section className="w-full bg-charcoal py-8 px-2 sm:px-4 flex flex-col items-center">
+      <h2 className="text-beige font-heading text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center">
         Simple, Transparent Pricing
       </h2>
-      <p className="text-gray text-base sm:text-lg mb-6 text-center max-w-2xl">
+      <p className="text-gray text-sm xs:text-base sm:text-lg mb-6 text-center max-w-2xl">
         No credit card required. All plans include the marketplace. Pro and Premium include the learning portal.
       </p>
       <div className="flex items-center gap-4 mb-10">
@@ -44,7 +44,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ plans }) => {
         </button>
         <span className={`font-semibold ${billing === 'yearly' ? 'text-gold' : 'text-gray'}`}>Yearly <span className="text-xs">(save up to 20%)</span></span>
       </div>
-      <div className="flex flex-col md:flex-row gap-8 md:gap-6 w-full max-w-5xl justify-center items-stretch">
+      <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl justify-center items-stretch">
         {plans.map((plan) => (
           <PricingBox
             key={plan.plan}
