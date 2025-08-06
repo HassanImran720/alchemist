@@ -53,7 +53,7 @@ const FeaturesSection: React.FC = () => {
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         <EngineeredExcellence />
 
-        <div className="flex flex-wrap sm:gap-6 w-full justify-center">
+        {/* <div className="flex flex-wrap sm:gap-6 w-full justify-center">
           {features.map((feature) => (
             <div
               key={feature.title}
@@ -62,7 +62,18 @@ const FeaturesSection: React.FC = () => {
               <FeatureBox {...feature} />
             </div>
           ))}
-        </div>
+        </div> */}
+        <div className="flex flex-wrap gap-4 sm:gap-6 w-full justify-center">
+  {features.map((feature) => (
+    <div
+      key={feature.title}
+      className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 flex justify-center"
+    >
+      <FeatureBox {...feature} />
+    </div>
+  ))}
+</div>
+
       </div>
     </section>
   );
