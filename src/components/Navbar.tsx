@@ -10,20 +10,22 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = "AICHEMIST" }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav className="w-full bg-charcoal text-ivory border-b border-neutral px-4 sm:px-6 py-3">
+    <nav className="w-full bg-charcoal text-ivory px-4 sm:px-6 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
+        <Link href="/">
         <div className="flex items-center gap-2">
           <span className="rounded-full border-2 border-gold w-7 h-7 flex items-center justify-center">
             <span className="text-gold text-lg font-bold">△</span>
           </span>
           <span className="font-heading text-xl text-gold font-bold">{logoText}</span>
         </div>
+        </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
           <Link href="#features" className="text-slategray hover:text-gold transition-colors">Features</Link>
-          <Link href="#pricing" className="text-slategray hover:text-gold transition-colors">Pricing</Link>
+          <Link href="pricing" className="text-slategray hover:text-gold transition-colors">Pricing</Link>
           <Link href="#login" className="text-gold font-semibold hover:text-ivory transition-colors">Login</Link>
           <Link href="#lab">
             <button className="bg-gradient-to-r from-[#e0b347] to-[#c8921a] text-charcoal font-semibold px-4 py-2 rounded hover:bg-neutral transition-colors">
