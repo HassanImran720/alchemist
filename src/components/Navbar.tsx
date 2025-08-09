@@ -26,8 +26,8 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = "AICHEMIST" }) => {
         <div className="hidden md:flex items-center gap-8">
           <Link href="#features" className="text-slategray hover:text-gold transition-colors">Features</Link>
           <Link href="pricing" className="text-slategray hover:text-gold transition-colors">Pricing</Link>
-          <Link href="#login" className="text-gold font-semibold hover:text-ivory transition-colors">Login</Link>
-          <Link href="#lab">
+          <Link href="login" className="text-gold font-semibold hover:text-ivory transition-colors">Login</Link>
+          <Link href="/lab">
             <button className="bg-gradient-to-r from-[#e0b347] to-[#c8921a] text-charcoal font-semibold px-4 py-2 rounded hover:bg-neutral transition-colors">
               Enter the Lab
             </button>
@@ -51,9 +51,9 @@ const Navbar: React.FC<NavbarProps> = ({ logoText = "AICHEMIST" }) => {
         className={`md:hidden flex flex-col gap-4 px-4 pt-2 pb-4 bg-charcoal transition-all duration-300 ease-in-out ${menuOpen ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}
       >
         <Link href="#features" className="text-slategray hover:text-gold transition-colors" onClick={() => setMenuOpen(false)}>Features</Link>
-        <Link href="#pricing" className="text-slategray hover:text-gold transition-colors" onClick={() => setMenuOpen(false)}>Pricing</Link>
-        <Link href="#login" className="text-gold font-semibold hover:text-ivory transition-colors" onClick={() => setMenuOpen(false)}>Login</Link>
-        <Link href="#lab" onClick={() => setMenuOpen(false)}>
+        <Link href="pricing" className="text-slategray hover:text-gold transition-colors" onClick={() => setMenuOpen(false)}>Pricing</Link>
+        <Link href="login" className="text-gold font-semibold hover:text-ivory transition-colors" onClick={() => setMenuOpen(false)}>Login</Link>
+        <Link href="/lab" onClick={() => setMenuOpen(false)}>
           <button className="bg-gold text-charcoal font-semibold px-4 py-2 rounded hover:bg-neutral transition-colors w-full text-left">
             Enter the Lab
           </button>
