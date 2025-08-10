@@ -14,9 +14,9 @@ import Link from "next/link";
 
 const navItems = [
   { label: "Prompt Engineering", icon: FlaskConical, href: "/lab" },
-  { label: "My Account", icon: User, href: "#account" },
-  { label: "Prompt Library", icon: BookOpen, href: "#library" },
-  { label: "Learn and Build", icon: FlaskRound, href: "#learn" },
+  { label: "My Account", icon: User, href: "/lab/my-account" },
+  { label: "Prompt Library", icon: BookOpen, href: "/lab/prompt-library" },
+  { label: "Learn and Build", icon: FlaskRound, href: "/lab/learn-build" },
   { label: "Support", icon: Lightbulb, href: "/lab/support" },
 ];
 
