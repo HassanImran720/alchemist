@@ -804,7 +804,7 @@ const BusinessContextStep: React.FC<Props> = ({
             ➤ {group.group}
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
             {group.fields.map((field, i) => (
               <div key={i} className="flex flex-col">
                 <label className="mb-1 text-sm font-medium text-gray-700">
