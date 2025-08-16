@@ -22,17 +22,21 @@ const ReferencesStep: React.FC<Props> = ({
   const [includeEmojis, setIncludeEmojis] = useState(false);
 
   return (
-    <div className="rounded-lg border-[0.5px] border-gold/30 p-6 mb-6 ">
+    <div className="rounded-lg border-[0.5px] border-gold/30 p-4 sm:p-6 mb-6">
       {/* Step Header */}
       <div className="flex items-center mb-4">
         <div className="bg-gold text-ivory rounded-full w-8 h-8 flex items-center justify-center font-semibold mr-3">
           4
         </div>
-        <h2 className="text-xl font-semibold text-charcoal">References & Output Format</h2>
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-charcoal">
+          References & Output Format
+        </h2>
       </div>
 
       {/* References */}
-      <label className="block text-sm font-medium mb-2 text-gray">References (Optional)</label>
+      <label className="block text-sm font-medium mb-2 text-gray">
+        References (Optional)
+      </label>
       <textarea
         rows={4}
         className="w-full p-3 bg-ivory border-[0.5px] border-gold/30 rounded-md focus:ring-2 focus:ring-gold mb-4"
@@ -41,12 +45,14 @@ const ReferencesStep: React.FC<Props> = ({
         onChange={(e) => setReferences(e.target.value)}
       />
 
-      {/* Output & Prompt Format (side by side) */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      {/* Output & Prompt Format */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray">Output Format</label>
+          <label className="block text-sm font-medium mb-2 text-gray">
+            Output Format
+          </label>
           <select
-            className="w-full px-3 py-1.5 border-[0.5px] border-gold/30 rounded-md focus:ring-2 focus:ring-gold bg-ivory"
+            className="w-full px-3 py-2 border-[0.5px] border-gold/30 rounded-md focus:ring-2 focus:ring-gold bg-ivory"
             value={outputFormat}
             onChange={(e) => setOutputFormat(e.target.value)}
           >
@@ -61,14 +67,14 @@ const ReferencesStep: React.FC<Props> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2 text-gray">Prompt Format</label>
+          <label className="block text-sm font-medium mb-2 text-gray">
+            Prompt Format
+          </label>
           <select
-            className="w-full px-3 py-1.5 border-[0.5px] border-gold/30 rounded-md focus:ring-2 focus:ring-gold bg-ivory"
-             value={promptFormat || ""}
-  onChange={(e) => setPromptFormat && setPromptFormat(e.target.value)}
->
-  
-
+            className="w-full px-3 py-2 border-[0.5px] border-gold/30 rounded-md focus:ring-2 focus:ring-gold bg-ivory"
+            value={promptFormat || ""}
+            onChange={(e) => setPromptFormat && setPromptFormat(e.target.value)}
+          >
             <option value="">Select prompt format...</option>
             <option value="json">JSON</option>
             <option value="standard">Standard</option>
@@ -93,10 +99,10 @@ const ReferencesStep: React.FC<Props> = ({
       </div>
 
       {/* Generate Button */}
-      <div className="text-center">
+      <div>
         <button
           onClick={onGenerate}
-          className="w-full bg-gold hover:bg-gold text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+          className="w-full bg-gold hover:bg-gold-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200"
         >
           Generate AI Output
         </button>

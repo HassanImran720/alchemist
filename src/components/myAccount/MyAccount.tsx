@@ -1,81 +1,112 @@
 "use client";
 import React from "react";
-import { User, Crown, ChevronLeft } from "lucide-react";
+import { User, Crown } from "lucide-react";
 
 const MyAccount: React.FC = () => {
   return (
-    <div className="flex-1 bg-ivory min-h-screen">
-      {/* Header */}
-      <div className="px-8 py-6 border-b border-gold/20">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-black font-heading">My Account</h1>
-            <p className="text-gray mt-1">Manage your AIChemist profile and preferences</p>
+    <div className="flex-1 bg-gray-50 min-h-screen">
+      {/* Header Section */}
+      <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-center">
+        {/* Profile Avatar with PRO Badge */}
+        <div className="relative inline-block mb-6">
+          <div className="w-15 h-15 sm:w-24 sm:h-24 bg-gold rounded-full flex items-center justify-center shadow-lg">
+            <User className="w-8 h-8 sm:w-10 sm:h-10 text-ivory" />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="flex items-center gap-2 bg-gold px-3 py-1 rounded-full">
-                <Crown className="w-4 h-4 text-white" />
-                <span className="text-white text-sm font-semibold">PRO</span>
-              </div>
-              <span className="text-black font-medium mt-1">@username</span>
-            </div>
+          {/* PRO Badge */}
+          <div className="absolute -top-2 -right-2 bg-gold text-ivory text-xs font-bold px-2 py-1 rounded-full shadow-md">
+            👑 PRO
           </div>
+        </div>
+
+        {/* Title and Description */}
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-charcoal mb-2">
+          My Account
+        </h1>
+        <p className="text-gray-500 text-sm sm:text-base">
+          Manage your AIChemist profile and preferences
+        </p>
+      </div>
+
+      {/* Account Statistics Card */}
+      <div className="px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-4xl mx-auto">
+         <div className="bg-ivory rounded-xl shadow-sm border-[0.5px] border-gold/30 p-3 sm:p-6">
+  <h2 className="text-lg sm:text-xl font-semibold text-gray mb-4 text-left">
+    Account Statistics
+  </h2>
+  
+  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6">
+    <div className="text-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gold mb-1">
+        247
+      </div>
+      <div className="text-gray-500 text-sm sm:text-base">
+        Active Formulas
+      </div>
+    </div>
+    
+    <div className="text-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gold mb-1">
+        94%
+      </div>
+      <div className="text-gray-500 text-sm sm:text-base">
+        Success Rate
+      </div>
+    </div>
+    
+    <div className="text-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gold mb-1">
+        1,250
+      </div>
+      <div className="text-gray-500 text-sm sm:text-base">
+        Charms Available
+      </div>
+    </div>
+    
+    <div className="text-center">
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gold mb-1">
+        89
+      </div>
+      <div className="text-gray-500 text-sm sm:text-base">
+        Lab Sessions
+      </div>
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="px-8 py-8">
-        {/* Account Statistics */}
-        <div className="mb-12">
-          <h2 className="text-xl font-semibold text-black mb-6">Account Statistics</h2>
-          <div className="grid grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gold mb-2">247</div>
-              <div className="text-gray text-sm font-medium">Active Formulas</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gold mb-2">94%</div>
-              <div className="text-gray text-sm font-medium">Success Rate</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gold mb-2">1,250</div>
-              <div className="text-gray text-sm font-medium">Charms Available</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-gold mb-2">89</div>
-              <div className="text-gray text-sm font-medium">Lab Sessions</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Settings */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-black mb-6">Profile Settings</h2>
-          <div className="bg-white rounded-lg shadow-sm border border-gold/20 p-6">
-            <button className="w-full bg-gold text-white py-3 px-6 rounded-md font-medium hover:bg-gold/90 transition-colors mb-4">
+      {/* Profile Settings Section */}
+      <div className="px-4 sm:px-6 lg:px-8 pb-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-ivory rounded-xl shadow-sm border-[0.5px] border-gold/30 p-6 sm:p-8">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-6">
+              Profile Settings
+            </h2>
+            
+            <button className="w-full bg-gold text-ivory py-3 px-6 rounded-lg font-medium transition-colors mb-6 text-sm sm:text-base">
               TELL US ABOUT YOURSELF
             </button>
-            <div className="space-y-2 text-sm text-gray">
-              <div>RESET EVERYTHING</div>
-              <div>ACCESS PROMPT LIBRARY</div>
-              <div>CONTINUE LEARNING</div>
-              <div>PROVIDE FEEDBACK</div>
-              <div>GET SUPPORT</div>
+            
+            <div className="space-y-3">
+              {[
+                "RESET EVERYTHING",
+                "ACCESS PROMPT LIBRARY",
+                "CONTINUE LEARNING", 
+                "PROVIDE FEEDBACK",
+                "GET SUPPORT",
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  className="w-full text-left py-3 px-4 text-sm sm:text-base text-gray hover:text-gold hover:bg-gray-50 transition-all rounded-lg font-medium"
+                >
+                  {item}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Footer */}
-      <div className="fixed bottom-4 left-4">
-        <button className="flex items-center gap-2 text-gold font-semibold hover:text-gold/80 transition-colors">
-          <ChevronLeft className="w-5 h-5" />
-          Collapse Lab
-        </button>
       </div>
     </div>
   );

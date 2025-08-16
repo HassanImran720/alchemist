@@ -3,14 +3,18 @@ import LoginForm from "./LoginForm";
 
 const LoginPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f4f3f1] px-2 py-8 sm:px-4 md:px-8 lg:px-0">
-      <div className="flex flex-col items-center mb-6">
-        <span className="mb-2">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 6L8 42h32L24 6z" stroke="#e0b347" strokeWidth="3" fill="#fffbe8"/></svg>
-        </span>
-        <span className="text-2xl sm:text-3xl font-heading font-bold tracking-widest text-gold">AICHEMIST</span>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f4f3f1] px-4 sm:px-6 md:px-8 py-6 sm:py-8 lg:py-10">
+      {/* Logo */}
+      <div className="flex flex-col items-center mb-6 sm:mb-8">
+        <img
+          src="/WithBgBackground.png"
+          alt="Logo"
+          className="w-32 sm:w-48 md:w-56 lg:w-64 h-auto"
+        />
       </div>
-      <div className="w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-md">
+
+      {/* Form Container */}
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
         <LoginForm />
       </div>
     </div>

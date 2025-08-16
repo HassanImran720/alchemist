@@ -1,3 +1,35 @@
+// import React from "react";
+
+// export interface FeatureBoxProps {
+//   icon: React.ReactNode;
+//   title: string;
+//   description: string;
+// }
+
+// const FeatureBox: React.FC<FeatureBoxProps> = ({ icon, title, description }) => {
+//   return (
+//     // <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-6 flex flex-col items-start h-full transition-all duration-200 hover:border-gold/50 hover:shadow-lg">
+//    <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-6 flex flex-col items-start h-[300px] transition-all duration-200 hover:border-gold/50 hover:shadow-lg">
+
+//     {/* Icon container */}
+//       <div className="mb-4 w-10 h-10 flex items-center justify-center bg-[#d4af37]/10 rounded-md">
+//         <span className="text-gold text-2xl">{icon}</span>
+//       </div>
+
+//       {/* Title */}
+//       <h3 className="text-beige font-semibold text-xl mb-3 leading-tight">
+//         {title}
+//       </h3>
+
+//       {/* Description */}
+//       <p className="text-gray text-md leading-relaxed flex-grow">
+//         {description}
+//       </p>
+//     </div>
+//   );
+// };
+
+// export default FeatureBox;
 import React from "react";
 
 export interface FeatureBoxProps {
@@ -8,15 +40,22 @@ export interface FeatureBoxProps {
 
 const FeatureBox: React.FC<FeatureBoxProps> = ({ icon, title, description }) => {
   return (
-    <div
-      className={`bg-slate rounded-xl p-5 sm:p-6 flex flex-col items-start min-w-[180px] sm:min-w-[220px] min-h-[160px] sm:min-h-[200px] shadow-md transition-all duration-200
-        hover:border-gold hover:shadow-gold/30 hover:shadow-lg hover:ring-2 hover:ring-gold/30 w-full`}
-    >
-      <div className="mb-4 w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center bg-gold/10 rounded-md">
-        <span className="text-gold text-xl sm:text-2xl">{icon}</span>
+    <div className="bg-[#1a1a1a] border border-[#333] rounded-lg p-6 flex flex-col items-start min-h-[300px] transition-all duration-200 hover:border-gold/50 hover:shadow-lg shadow-gold gap-y-4">
+      
+      {/* Icon container */}
+      <div className="w-12 h-12 flex items-center justify-center bg-[#d4af37]/10 rounded-md">
+        <span className="text-gold text-3xl">{icon}</span>
       </div>
-      <h3 className="text-beige font-bold text-base sm:text-lg mb-2">{title}</h3>
-      <p className="text-gray text-xs sm:text-sm">{description}</p>
+
+      {/* Title */}
+      <h3 className="text-beige font-semibold text-2xl leading-tight">
+        {title}
+      </h3>
+
+      {/* Description */}
+      <p className="text-gray text-md leading-relaxed">
+        {description}
+      </p>
     </div>
   );
 };

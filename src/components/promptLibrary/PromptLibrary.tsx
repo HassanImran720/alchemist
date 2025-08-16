@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Search, Edit, Clock, ChevronLeft, MoreHorizontal } from "lucide-react";
+import { Search, Edit, Clock } from "lucide-react";
 
 interface PromptItem {
   id: string;
@@ -19,31 +19,33 @@ const PromptLibrary: React.FC = () => {
   ]);
 
   return (
-    <div className="px-[10.875rem] p-10 space-y-4 container">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-[10.875rem] py-10 space-y-6">
       {/* Header */}
-      <div className="px-8 py-6">
-        <h1 className="text-3xl font-bold text-black font-heading mb-2">PROMPT LIBRARY</h1>
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-black font-heading mb-2">
+          PROMPT LIBRARY
+        </h1>
       </div>
 
       {/* Search Bar */}
-      <div className="px-8 mb-8">
-        <div className="relative max-w-2xl">
+      <div>
+        <div className="relative w-full max-w-full sm:max-w-xl">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray" />
           <input
             type="text"
             placeholder="PROJECT NAME"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border-[0.5px] border-gold/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold"
+            className="w-full pl-12 pr-4 py-3 border border-gold/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold text-sm sm:text-base"
           />
         </div>
       </div>
 
       {/* Prompt List */}
-      <div className="px-8">
+      <div>
         <div className="rounded-lg shadow-sm border border-gold/20 overflow-hidden">
-          {/* Table Header */}
-          <div className="bg-gray/10 px-6 py-4 border-b border-gold/20">
+          {/* Table Header - hidden on small screens */}
+          <div className="hidden md:block bg-gray/10 px-6 py-4 border-b border-gold/20">
             <div className="grid grid-cols-6 gap-4 text-sm font-semibold text-black uppercase tracking-wide">
               <div>PROMPT NAME</div>
               <div>DATE</div>
@@ -56,9 +58,13 @@ const PromptLibrary: React.FC = () => {
 
           {/* Table Rows */}
           <div className="divide-y divide-gold/20">
-            {prompts.map((prompt, index) => (
-              <div key={prompt.id} className="px-6 py-4 hover:bg-gray/5 transition-colors">
-                <div className="grid grid-cols-6 gap-4 items-center">
+            {prompts.map((prompt) => (
+              <div
+                key={prompt.id}
+                className="px-4 sm:px-6 py-4 hover:bg-gray/5 transition-colors"
+              >
+                {/* Desktop view */}
+                <div className="hidden md:grid grid-cols-6 gap-4 items-center">
                   <div className="font-medium text-black">{prompt.name}</div>
                   <div className="text-gray">{prompt.date}</div>
                   <div className="text-black font-medium">{prompt.score}</div>
@@ -74,16 +80,34 @@ const PromptLibrary: React.FC = () => {
                   </div>
                   <div className="text-gray">NOTES</div>
                 </div>
+
+                {/* Mobile view */}
+                <div className="md:hidden space-y-2 border-l-4 border-gold pl-3">
+                  <div className="font-medium text-black">{prompt.name}</div>
+                  <div className="text-gray text-sm">{prompt.date}</div>
+                  <div className="text-black font-medium">
+                    Score: {prompt.score}
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <button className="text-gray hover:text-gold transition-colors flex items-center gap-1">
+                      <Edit className="w-4 h-4" /> Edit
+                    </button>
+                    <button className="text-gray hover:text-gold transition-colors flex items-center gap-1">
+                      <Clock className="w-4 h-4" /> Time
+                    </button>
+                  </div>
+                  <div className="text-gray text-sm">NOTES</div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Empty State Message */}
+        {/* Empty State */}
         {prompts.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray mb-4">No prompts found</div>
-            <button className="bg-gold text-white px-6 py-2 rounded-md hover:bg-gold/90 transition-colors">
+            <button className="bg-gold text-white px-6 py-2 rounded-md hover:bg-gold/90 transition-colors w-full sm:w-auto">
               Create Your First Prompt
             </button>
           </div>
@@ -94,7 +118,6 @@ const PromptLibrary: React.FC = () => {
 };
 
 export default PromptLibrary;
-
 
 // "use client";
 // import React, { useState } from "react";

@@ -2,7 +2,7 @@ import React from 'react'
 
 const EngineeredExcellence = () => {
   return (
-    <div className="w-full px-2 sm:px-0">
+    <div className="w-full px-2 sm:px-0 ">
         <h2 className="text-beige font-heading text-2xl sm:text-4xl md:text-5xl font-bold mb-4 text-center">
           Engineered for Excellence
         </h2>

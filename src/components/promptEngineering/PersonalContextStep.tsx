@@ -102,7 +102,7 @@ const PersonalContextStep: React.FC<Props> = ({ contextData, setContextData }) =
       <div className="flex flex-col sm:flex-row sm:items-center mb-4">
         <div className="bg-gold text-ivory rounded-full w-8 h-8 flex items-center justify-center font-semibold mr-0 sm:mr-3 mb-2 sm:mb-0">3</div>
         <div>
-          <h2 className="text-lg sm:text-xl font-semibold text-charcoal">Provide Personal Context</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-charcoal">Provide Personal Context</h2>
           <p className="text-sm text-gray">Help us understand your life context for more personalized AI output.</p>
         </div>
       </div>

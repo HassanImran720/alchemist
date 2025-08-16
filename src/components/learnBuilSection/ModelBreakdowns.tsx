@@ -43,24 +43,21 @@ const ModelBreakdowns: React.FC = () => {
   ];
 
   return (
-  <div className="grid grid-cols-2 gap-6 items-start">
-  {models.map((model) => (
-    <div
-      key={model.id}
-      className="rounded-lg border-[0.5px] border-gold/30 p-6 hover:shadow-md min-h"
-    >
-      <div className="flex items-start mb-2">
-        <div className="text-gold mr-1">{model.icon}</div>
-        <div>
-          <h3 className="text-lg font-semibold text-black">{model.name}</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start">
+      {models.map((model) => (
+        <div
+          key={model.id}
+          className="rounded-lg border-[0.5px] border-gold/30 p-6 hover:shadow-md transition-shadow"
+        >
+          <div className="flex items-start mb-2">
+            <div className="text-gold mr-2">{model.icon}</div>
+            <h3 className="text-lg font-semibold text-black">{model.name}</h3>
+          </div>
+          <p className="text-gray text-sm">{model.description}</p>
+          <p className="text-sm font-medium text-black">{model.recommendation}</p>
         </div>
-      </div>
-      <p className="text-gray text-sm">{model.description}</p>
-      <p className="text-sm font-medium text-black">{model.recommendation}</p>
+      ))}
     </div>
-  ))}
-</div>
-
   );
 };
 
