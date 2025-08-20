@@ -51,7 +51,7 @@ const FAQSection: React.FC = () => {
     
       <div className="space-y-2">
         {faqData.map((faq) => (
-          <div key={faq.id} className="border-b-[0.2px] border-gray">
+          <div key={faq.id} className="border-b-[0.2px] border-[#dedede]">
             <button
               className="w-full text-left flex justify-between items-center p-4"
               onClick={() => setOpenId(openId === faq.id ? null : faq.id)}

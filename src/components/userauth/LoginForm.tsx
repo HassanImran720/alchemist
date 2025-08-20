@@ -1,5 +1,5 @@
 import React from "react";
-
+import Link from "next/link";
 interface LoginFormProps {
   onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
 }
@@ -105,9 +105,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         <label className="flex items-center gap-2">
           <input type="checkbox" className="accent-gold" /> Remember me
         </label>
-        <a href="#" className="text-gold hover:underline">
+        <Link href="forgot-password" className="text-gold hover:underline">
           Forgot password?
-        </a>
+        </Link>
       </div>
 
       {/* Sign In */}
@@ -121,9 +121,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       {/* Sign Up Link */}
       <p className="text-center text-xs sm:text-sm mt-2 text-slategray">
         Don't have an account?{" "}
-        <a href="/signup" className="text-gold hover:underline">
+        <Link href="/signup" className="text-gold hover:underline">
           Sign up
-        </a>
+        </Link>
       </p>
     </form>
   );
