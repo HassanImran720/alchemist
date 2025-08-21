@@ -101,10 +101,10 @@ const MessageForm: React.FC = () => {
             Subject
           </label>
           <input
-            name="How can we help you?"
+            name="subject"
             value={formData.subject}
             onChange={handleChange}
-            placeholder="Subject"
+            placeholder="How can we help you?"
             className="w-full px-3 py-2 border-[0.5px] border-[#dedede] rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition duration-200"
             required
           />
@@ -116,11 +116,11 @@ const MessageForm: React.FC = () => {
             Message
           </label>
           <textarea
-            name="Please describe your issue and question in detail..."
+            name="message"
             rows={4} // slightly shorter than before
             value={formData.message}
             onChange={handleChange}
-            placeholder="Describe your issue..."
+            placeholder="Please describe your issue and question in detail..."
             className="w-full px-3 py-2 border-[0.5px] border-[#dedede] rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-black transition duration-200 resize-y"
             required
           />
