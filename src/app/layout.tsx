@@ -1,9 +1,11 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/Navbar";
 import "./globals.css";
 import Footer from "@/components/Footer";
 import LayoutWrapper from "./LayoutWrapper";
+import { AuthProvider } from "@/context/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,12 +33,15 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Libre+Baskerville&family=Lora&display=swap"
           rel="stylesheet"
         />
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body
         className=''
       >
      
-     <LayoutWrapper>{children}</LayoutWrapper>
+     <AuthProvider>
+       <LayoutWrapper>{children}</LayoutWrapper>
+     </AuthProvider>
       
       </body>
     </html>

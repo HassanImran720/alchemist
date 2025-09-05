@@ -1,13 +1,48 @@
-import React from "react";
-import Link from "next/link";
-interface LoginFormProps {
-  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+// Fix for window.google TypeScript error
+declare global {
+  interface Window {
+    google: any;
+  }
 }
+"use client";
+import React, { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC = () => {
+  const { login, loading, error } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Manual login
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await login({ email, password }, "manual");
+  };
+
+  // Google login
+ // LoginForm.tsx (sirf handleGoogle update karna hai)
+const handleGoogle = () => {
+  const mode = "login"; // ya "signup"
+  const state = encodeURIComponent(JSON.stringify({ mode }));
+
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_ID}&redirect_uri=${window.location.origin}/google-callback&response_type=id_token&scope=openid%20email%20profile&state=${state}&nonce=123`;
+};
+
+
+
+  // GitHub login
+  // const handleGithub = () => {
+  //   window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_ID}&redirect_uri=${window.location.origin}/github-callback&scope=user:email`;
+//  // };
+const handleGithub = () => {
+  const mode = "login"; // ya "login"
+  const state = encodeURIComponent(JSON.stringify({ mode }));
+  window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_ID}&redirect_uri=${window.location.origin}/github-callback&scope=user:email&state=${state}`;
+};
   return (
     <form
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       className="bg-ivory rounded-xl shadow-lg p-4 sm:p-6 md:p-8 w-full max-w-md mx-auto flex flex-col gap-4 border border-neutral"
     >
       <h2 className="text-xl sm:text-2xl font-bold text-center mb-2">Welcome back</h2>
@@ -18,7 +53,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       {/* GitHub Button */}
       <button
         type="button"
+        onClick={handleGithub}
         className="w-full flex items-center justify-center gap-2 border border-neutral rounded-md py-2 font-semibold hover:bg-gold/10 transition-colors text-sm sm:text-base"
+        disabled={loading}
       >
         <img
           src="/github.svg"
@@ -35,7 +72,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       {/* Google Button */}
       <button
         type="button"
+        onClick={handleGoogle}
         className="w-full flex items-center justify-center gap-2 border border-neutral rounded-md py-2 font-semibold hover:bg-gold/10 transition-colors text-sm sm:text-base"
+        disabled={loading}
       >
         <img
           src="/google.svg"
@@ -56,6 +95,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
         <div className="flex-1 h-px bg-neutral" />
       </div>
 
+      {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+
       {/* Email Field */}
       <label className="text-xs sm:text-sm font-semibold">
         Email
@@ -65,6 +106,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
             required
             placeholder="name@example.com"
             className="w-full border border-neutral rounded-md py-2 pl-3 pr-10 bg-white text-charcoal focus:outline-gold"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gold">
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
@@ -87,6 +130,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
             required
             placeholder="Enter your password"
             className="w-full border border-neutral rounded-md py-2 pl-3 pr-10 bg-white text-charcoal focus:outline-gold"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gold">
             <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
@@ -114,8 +159,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
       <button
         type="submit"
         className="w-full bg-gold text-charcoal font-bold py-2 rounded-md mt-2 hover:bg-[#c8921a] transition-colors text-sm sm:text-base"
+        disabled={loading}
       >
-        Sign In
+        {loading ? 'Signing In...' : 'Sign In'}
       </button>
 
       {/* Sign Up Link */}

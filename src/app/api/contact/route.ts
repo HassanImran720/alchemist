@@ -58,13 +58,13 @@ export async function POST(req: NextRequest) {
           <img src="cid:logo" alt="Company Logo" style="width:120px; margin-top:10px;" />
         </div>
       `,
-      attachments: [
-        {
-          filename: "LOGO.png",
-          path: "./public/LOGO.png", // make sure your logo is in the public folder
-          cid: "logo", // same cid value as in the html img src
-        },
-      ],
+      // attachments: [
+      //   {
+      //     filename: "LOGO.png",
+      //     path: "./public/LOGO.png", // make sure your logo is in the public folder
+      //     cid: "logo", // same cid value as in the html img src
+      //   },
+      // ],
     });
 
     return NextResponse.json({ message: "Email sent successfully" }, { status: 200 });
