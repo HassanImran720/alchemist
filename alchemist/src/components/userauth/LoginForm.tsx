@@ -15,34 +15,29 @@ const LoginForm: React.FC = () => {
   const [password, setPassword] = useState("");
 
   // Manual login
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await login({ email, password }, "manual");
-  };
+  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   await login({ email, password }, "manual");
+  // };
 
   // Google login
  // LoginForm.tsx (sirf handleGoogle update karna hai)
-const handleGoogle = () => {
-  const mode = "login"; // ya "signup"
-  const state = encodeURIComponent(JSON.stringify({ mode }));
+// const handleGoogle = () => {
+//   const mode = "login"; // ya "signup"
+//   const state = encodeURIComponent(JSON.stringify({ mode }));
 
-  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_ID}&redirect_uri=${window.location.origin}/google-callback&response_type=id_token&scope=openid%20email%20profile&state=${state}&nonce=123`;
-};
+//   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_ID}&redirect_uri=${window.location.origin}/google-callback&response_type=id_token&scope=openid%20email%20profile&state=${state}&nonce=123`;
+// };
 
 
-
-  // GitHub login
-  // const handleGithub = () => {
-  //   window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_ID}&redirect_uri=${window.location.origin}/github-callback&scope=user:email`;
-//  // };
-const handleGithub = () => {
-  const mode = "login"; // ya "login"
-  const state = encodeURIComponent(JSON.stringify({ mode }));
-  window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_ID}&redirect_uri=${window.location.origin}/github-callback&scope=user:email&state=${state}`;
-};
+// const handleGithub = () => {
+//   const mode = "login"; // ya "login"
+//   const state = encodeURIComponent(JSON.stringify({ mode }));
+//   window.location.href = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_ID}&redirect_uri=${window.location.origin}/github-callback&scope=user:email&state=${state}`;
+// };
   return (
     <form
-      onSubmit={handleSubmit}
+      // onSubmit={handleSubmit}
       className="bg-ivory rounded-xl shadow-lg p-4 sm:p-6 md:p-8 w-full max-w-md mx-auto flex flex-col gap-4 border border-neutral"
     >
       <h2 className="text-xl sm:text-2xl font-bold text-center mb-2">Welcome back</h2>
@@ -53,7 +48,7 @@ const handleGithub = () => {
       {/* GitHub Button */}
       <button
         type="button"
-        onClick={handleGithub}
+        // onClick={handleGithub}
         className="w-full flex items-center justify-center gap-2 border border-neutral rounded-md py-2 font-semibold hover:bg-gold/10 transition-colors text-sm sm:text-base"
         disabled={loading}
       >
@@ -72,7 +67,7 @@ const handleGithub = () => {
       {/* Google Button */}
       <button
         type="button"
-        onClick={handleGoogle}
+        // onClick={handleGoogle}
         className="w-full flex items-center justify-center gap-2 border border-neutral rounded-md py-2 font-semibold hover:bg-gold/10 transition-colors text-sm sm:text-base"
         disabled={loading}
       >

@@ -11,14 +11,14 @@ export default function Home() {
     <>
       <main className="snap-y snap-mandatory">
     
-            <section className="snap-start min-h-screen flex flex-col justify-center items-center bg-[#1a1a1a] px-4 md:px-8">
+            <section className="snap-start  flex flex-col justify-center items-center bg-[#1a1a1a] px-4 md:px-8">
               <HeroSection />
             </section>
-          <section className="snap-start min-h-screen flex flex-col justify-center items-center bg-charcoal px-4 md:px-8">
+          <section id="features-section" className="snap-start min-h-screen flex flex-col justify-center items-center bg-charcoal px-4 md:px-8">
               <FeaturesSection />
             </section>
 
-            <section>
+            <section id="contact-section">
               <Connect />
             </section>
       </main>

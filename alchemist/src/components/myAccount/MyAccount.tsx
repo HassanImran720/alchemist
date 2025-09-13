@@ -9,11 +9,11 @@ const MyAccount: React.FC = () => {
       <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-center">
         {/* Profile Avatar with PRO Badge */}
         <div className="relative inline-block mb-6">
-          <div className="w-15 h-15 sm:w-24 sm:h-24 bg-gold rounded-full flex items-center justify-center shadow-lg">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gold rounded-full flex items-center justify-center shadow-lg">
             <User className="w-8 h-8 sm:w-10 sm:h-10 text-ivory" />
           </div>
           {/* PRO Badge */}
-          <div className="absolute -top-2 -right-2 bg-gold text-ivory text-xs font-bold px-2 py-1 rounded-full shadow-md">
+          <div className=" absolute -top-2 -right-2 bg-gold text-ivory text-xs font-bold px-2 py-1 rounded-full shadow-md">
             👑 PRO
           </div>
         </div>

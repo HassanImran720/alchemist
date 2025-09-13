@@ -28,54 +28,50 @@ const SamplePrompting: React.FC = () => {
   return (
     <div className="space-y-8">
       {/* Prompt Templates List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {promptTemplates.map((template) => (
           <div
             key={template.id}
             className="rounded-xl border-[0.5px] border-gold/30 p-5 hover:shadow-md transition-shadow"
           >
-            {/* Category label */}
+          
             <div className="mb-2">
               <span className="inline-block rounded-full border-[0.5px] border-gold/30 px-3 py-1 text-xs font-medium text-charcoal">
                 {template.category}
               </span>
             </div>
 
-            {/* Title */}
+            
             <h3 className="text-base font-semibold text-charcoal">{template.title}</h3>
 
-            {/* Description */}
+            
             <p className="mt-1 text-sm text-gray">{template.description}</p>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* Blueprint Categories (if you want to enable later) */}
-      {/* 
+      
       <div>
-        <div className="flex flex-wrap gap-2 mb-6">
-          <button className="bg-gold text-white px-4 py-2 rounded font-medium">ALCHEMIST BLUEPRINT</button>
-          <button className="bg-gray/20 text-black px-4 py-2 rounded font-medium hover:bg-gray/30 transition-colors">MODEL BREAKDOWNS</button>
-          <button className="bg-gray/20 text-black px-4 py-2 rounded font-medium hover:bg-gray/30 transition-colors">SAMPLE PROMPTING</button>
-        </div>
+      
 
         <div className="mb-6 text-center">
-          <h3 className="text-gray mb-4">GET INSPIRATION FROM THE FOLLOWING PROMPTS</h3>
+          <h3 className="text-gray mb-4 text-lg">GET INSPIRATION FROM THE <br/>FOLLOWING PROMPTS</h3>
           <div className="text-black font-semibold mb-6">CHOOSE YOUR CATEGORY</div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3">
           {blueprintCategories.map((category, index) => (
             <button
               key={index}
-              className="bg-gold text-white py-3 px-4 rounded font-medium text-sm hover:bg-gold/90 transition-colors"
+              className="bg-gold text-black py-3 px-4 rounded font-medium text-sm hover:bg-gold/90 transition-colors"
             >
               {category}
             </button>
           ))}
         </div>
       </div>
-      */}
+     
     </div>
   );
 };

@@ -1,72 +1,49 @@
-"use client";
-import React, { useState } from 'react';
+import { useRef, useEffect } from "react";
 
 interface TestAIResponseStepProps {
-  generatedPrompt: string;
+  aiResponse: string;
   onTestComplete: (response: string) => void;
 }
 
 const TestAIResponseStep: React.FC<TestAIResponseStepProps> = ({
-  generatedPrompt,
+  aiResponse,
   onTestComplete
 }) => {
-  const [aiResponse, setAiResponse] = useState(
-    `reset in Costa Rica ✈
-• **Channel**: LinkedIn → Discovery Call (Include bonus guide: "Why Breathworkers Love This Trip")
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-#### 3. **Zoe Kim (Mindfulness) – Seattle, WA**
-
-• **Messaging Hook**: "Mindful travel made effortless ✈"
-• **CTA**: "Let us plan your next intentional escape"
-• **Channel**: Email → Text reminder → IG carousel post
-
----
-
-## 🎯 SALES ENABLEMENT & CLOSING TOOLS
-
-• ✅ **Live Client Q&A Webinars** (Biweekly)
-• ✅ **7-Day Decision Window Offer** (Incentivize conversion)
-• ✅ **Interactive Proposal Generator** (Include visuals, testimonials, add-ons)
-• ✅ **Post-Trip Guarantee**: "Not transformed? Get refund..."
-
-Test your prompt with an AI model and paste the response above to evaluate its quality.`
-  );
+  // auto resize function
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // reset height
+      textareaRef.current.style.height = `${Math.min(
+        textareaRef.current.scrollHeight,
+        600 // max height in px before scroll
+      )}px`;
+    }
+  }, [aiResponse]);
 
   return (
-    <div className="bg-ivory rounded-lg p-4 sm:p-6 mb-6 border-[0.5px] border-gold/30">
-      {/* Step Header */}
+    <div className="bg-ivory min-h-[400px] rounded-lg p-6 mb-6 border-[0.5px] border-gold/30">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center text-ivory font-bold text-sm">
-          7
+        <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-ivory font-bold text-base">
+          8
         </div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-charcoal">
+        <h2 className="text-2xl md:text-3xl font-bold text-charcoal">
           Test AI Response
         </h2>
       </div>
 
-      <div className="space-y-4">
-        {/* Textarea Input */}
-        <div>
-          <label className="block text-sm font-medium text-gray mb-2">
-            Paste AI Response for Evaluation
-          </label>
-          <textarea
-            value={aiResponse}
-            onChange={(e) => {
-              setAiResponse(e.target.value);
-              if (e.target.value) {
-                onTestComplete(e.target.value);
-              }
-            }}
-            className="bg-ivory w-full min-h-[12rem] p-4 border-[0.5px] border-gold/30 rounded-md text-sm resize-y focus:ring-2 focus:ring-gold"
-            placeholder="reset in Costa Rica..."
-          />
-        </div>
+      <textarea
+        ref={textareaRef}
+        value={aiResponse}
+        onChange={(e) => onTestComplete(e.target.value)}
+        className="w-full p-4 border border-gold/30 rounded-md bg-ivory text-base resize-none focus:ring-2 focus:ring-gold overflow-auto"
+        placeholder="Generated AI response will appear here..."
+      />
 
-        {/* Helper Text */}
-        <div className="text-sm text-gray leading-relaxed">
-          Test your prompt with an AI model and paste the response above to evaluate its quality.
-        </div>
+      <div className="text-sm text-gray mt-3 leading-relaxed">
+        Test your prompt with an AI model and edit the response if needed before evaluation. 
+        The box will expand to fit the text up to a limit, after which scrolling will appear.
       </div>
     </div>
   );

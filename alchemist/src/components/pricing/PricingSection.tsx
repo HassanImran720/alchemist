@@ -23,7 +23,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({ plans }) => {
     billing === "yearly" ? "/month (billed yearly)" : "/month";
 
   return (
-    <section className="w-full bg-charcoal py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+    // <section className="w-full bg-charcoal py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+    <section className="w-full min-h-screen bg-charcoal py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
       <h2 className="text-beige font-heading text-2xl sm:text-3xl md:text-5xl font-bold mb-3 text-center leading-snug">
         Simple, Transparent Pricing
       </h2>
@@ -34,7 +36,7 @@ const PricingSection: React.FC<PricingSectionProps> = ({ plans }) => {
       </p>
 
       {/* Billing Toggle */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-4 mb-10 sm:mb-14">
         <span
           className={`font-semibold ${
             billing === "monthly" ? "text-gold" : "text-gray"
@@ -65,7 +67,9 @@ const PricingSection: React.FC<PricingSectionProps> = ({ plans }) => {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl items-stretch">
+
         {plans.map((plan) => (
           <PricingBox
             key={plan.plan}

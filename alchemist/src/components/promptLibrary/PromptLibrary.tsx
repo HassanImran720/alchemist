@@ -21,7 +21,7 @@ const PromptLibrary: React.FC = () => {
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-[10.875rem] py-10 space-y-6">
       {/* Header */}
-      <div>
+      <div className="text-center lg:text-left">
         <h1 className="text-2xl sm:text-3xl font-bold text-black font-heading mb-2">
           PROMPT LIBRARY
         </h1>
@@ -65,7 +65,7 @@ const PromptLibrary: React.FC = () => {
               >
                 {/* Desktop view */}
                 <div className="hidden md:grid grid-cols-6 gap-4 items-center">
-                  <div className="font-medium text-black">{prompt.name}</div>
+                  <div className=" text-black">{prompt.name}</div>
                   <div className="text-gray">{prompt.date}</div>
                   <div className="text-black font-medium">{prompt.score}</div>
                   <div>

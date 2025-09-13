@@ -20,7 +20,7 @@ const ContactSidebar: React.FC = () => {
           {/* Contact Us */}
           <div className="space-y-8 border-[0.5px] border-[#dedede] rounded-xl p-6">
                 <h3 className="text-lg font-semibold mb-4 flex items-center">
-                <MessageCircle className="w-5 h-5 mr-2 text-blue-600" />
+                <MessageCircle className="w-5 h-5 mr-2 text-purple-600" />
                 Contact Us
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
@@ -31,26 +31,26 @@ const ContactSidebar: React.FC = () => {
                 <div className="space-y-3">
                 {/* Live Chat */}
                 <div className="flex items-center p-3 border-[0.5px] border-[#dedede]  hover:bg-gray-50 rounded-lg cursor-pointer transition">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex justify-center items-center mr-3">
-                    <MessageCircle className="w-4 h-4 text-blue-600" />
+                    <div className="w-8 h-8  rounded-full flex justify-center items-center mr-3">
+                    <MessageCircle className="w-4 h-4 text-purple-600" />
                     </div>
                     <div className="flex-1 ">
                     <p className="text-sm font-medium">Live Chat</p>
                     <p className="text-xs text-gray-500">Available</p>
                     </div>
-                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">
-                    Online
+                    <span className="bg-green-200 text-green-700 text-xs px-2 py-1 rounded-full">
+                    fastest
                     </span>
                 </div>
 
                 {/* Email */}
                 <div className="flex items-center p-3 border-[0.5px] border-[#dedede] hover:bg-gray-50 rounded-lg cursor-pointer transition">
                     <div className="w-8 h-8 bg-gray-100 rounded-full flex justify-center items-center mr-3">
-                    <Mail className="w-4 h-4 text-gray-600" />
+                    <Mail className="w-4 h-4 text-green-700" />
                     </div>
                     <div className="flex-1">
                     <p className="text-sm font-medium">Email Support</p>
-                    <p className="text-xs text-gray-500">We'll get back to you</p>
+                    {/* <p className="text-xs text-gray-500">We'll get back to you</p> */}
                     </div>
                 </div>
 

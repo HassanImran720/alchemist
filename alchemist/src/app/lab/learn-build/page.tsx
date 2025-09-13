@@ -1,4 +1,4 @@
-import LearnAndBuild from "@/components/learnBuilSection/LearnAndBuild"
+import LearnAndBuild from "@/components/education/LearnAndBuild"
 
 const page = () => {
   return (

@@ -5,7 +5,7 @@ import FAQSection from '@/components/contactUs/FAQSection';
 
 const SupportCenterPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white px-4 sm:px-6 py-8 text-center">
         <h1 className="text-2xl sm:text-3xl font-bold">Support Center</h1>

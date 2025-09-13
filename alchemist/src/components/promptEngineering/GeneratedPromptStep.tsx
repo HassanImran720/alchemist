@@ -4,7 +4,7 @@ import { Copy, Save, Check } from 'lucide-react';
 
 interface GeneratedPromptProps {
   taskDescription?: string;
-  selectedContext?: 'freeform' | 'business' | 'personal';
+  selectedContext?: 'flowmode' | 'guidedmode' ;
   contextData?: {
     dynamicFields?: Record<string, any>;
     customFields?: any[];
@@ -18,7 +18,7 @@ interface GeneratedPromptProps {
 
 const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
   taskDescription = '',
-  selectedContext = 'freeform',
+  selectedContext = 'flowmode',
   contextData = {},
   references = '',
   outputFormat = '',
@@ -60,7 +60,7 @@ const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
         }
       }
 
-      if (selectedContext === 'freeform' && typeof contextData.freeformContext === 'string') {
+      if (selectedContext === 'flowmode' && typeof contextData.freeformContext === 'string') {
         promptText += `${contextData.freeformContext}\n`;
       }
 

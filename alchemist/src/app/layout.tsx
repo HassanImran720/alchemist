@@ -36,7 +36,7 @@ export default function RootLayout({
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body
-        className=''
+        className='bg-charcoal'
       >
      
      <AuthProvider>
