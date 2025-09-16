@@ -69,7 +69,13 @@ const InsertReferences: React.FC<InsertReferencesProps> = ({ references, setRefe
 
   return (
     <div className=" p-6 rounded-lg border border-gold/30 shadow-sm space-y-4">
-      <h2 className="text-lg font-semibold mb-2">V. Insert References</h2>
+        <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >V. Insert References:
+
+</strong> How should the model use the references?
+
+ </h2>
+    </div>
 
       {/* Upload buttons */}
       <div className="flex gap-3 mb-3 flex-wrap">

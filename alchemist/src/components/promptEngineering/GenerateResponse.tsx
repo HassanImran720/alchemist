@@ -67,14 +67,12 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
 
   return (
     <div className="bg-ivory rounded-lg p-4 sm:p-6 mb-6 border-[0.5px] border-gold/30">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center text-ivory font-bold text-sm">
-          7
-        </div>
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-charcoal">
-          Generate Response
-        </h2>
-      </div>
+       <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >IX. Generate Response
+
+</strong>
+ </h2>
+    </div>
 
       {/* Select Model */}
       <div className="mb-4">

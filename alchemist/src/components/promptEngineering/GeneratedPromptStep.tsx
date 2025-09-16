@@ -106,13 +106,13 @@ const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
   };
 
   return (
-    <div className="rounded-lg shadow-sm border-[0.5px] border-gold/30 p-4 sm:p-6 mb-6 bg-ivory">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center justify-center w-8 h-8 bg-gold text-ivory rounded-full text-sm font-medium mr-3">
-          6
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-charcoal">Generated Prompt</h2>
-      </div>
+    <div className="rounded-lg shadow-sm border-[0.5px] border-gold/30 p-4 sm:p-6 mb-6 bg-ivory mt-6">
+          <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >VIII. Generated Prompt
+
+</strong> 
+ </h2>
+    </div>
 
       <div className="bg-ivory border-[0.5px] border-gold/30 rounded-md p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap overflow-x-auto min-h-[200px]">
         {generatePromptText()}

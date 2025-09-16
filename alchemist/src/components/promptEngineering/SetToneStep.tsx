@@ -59,15 +59,12 @@ const SetToneStep: React.FC<SetToneStepProps> = ({ toneData, setToneData }) => {
   return (
     <div className="bg-ivory rounded-lg border border-gold/30 p-6 mb-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center text-white font-bold text-sm">
-          4
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-black">Set Tone</h2>
-          <p className="text-sm text-gray-600">Define your voice and style</p>
-        </div>
-      </div>
+      <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >IV. Set Tone:
+
+</strong> Define the voice and style AI the model should use.
+ </h2>
+    </div>
 
       {/* Tone Bank Toggle */}
       <div className="mb-3 flex gap-2 items-center">

@@ -71,12 +71,12 @@ const ChoosePath: React.FC<Props> = ({ selectedContext, setSelectedContext }) =>
   return (
     <div className="rounded-xl  border border-gold/30 p-6 sm:p-8 mb-8">
       {/* Step Heading */}
-      <div className="flex items-center mb-6">
-        <div className="bg-gold text-ivory rounded-full w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center font-semibold mr-3 text-sm sm:text-base">
-          2
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-charcoal">Choose Your Path</h2>
-      </div>
+
+       <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >II. Choose Your Path
+</strong> </h2>
+    </div>
+  
 
       {/* Context Options */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

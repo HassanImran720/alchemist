@@ -5,7 +5,7 @@ interface TestAIResponseStepProps {
   onTestComplete: (response: string) => void;
 }
 
-const TestAIResponseStep: React.FC<TestAIResponseStepProps> = ({
+const ViewResponse: React.FC<TestAIResponseStepProps> = ({
   aiResponse,
   onTestComplete
 }) => {
@@ -24,14 +24,12 @@ const TestAIResponseStep: React.FC<TestAIResponseStepProps> = ({
 
   return (
     <div className="bg-ivory min-h-[400px] rounded-lg p-6 mb-6 border-[0.5px] border-gold/30">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-gold rounded-full flex items-center justify-center text-ivory font-bold text-base">
-          8
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-charcoal">
-          Test AI Response
-        </h2>
-      </div>
+        <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >X. View Response:
+
+</strong>
+ </h2>
+    </div>
 
       <textarea
         ref={textareaRef}
@@ -49,4 +47,4 @@ const TestAIResponseStep: React.FC<TestAIResponseStepProps> = ({
   );
 };
 
-export default TestAIResponseStep;
+export default ViewResponse;

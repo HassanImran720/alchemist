@@ -6,8 +6,8 @@ interface Props {
   setReferences: (value: string) => void;
   outputFormat: string;
   setOutputFormat: (value: string) => void;
-  promptFormat?: string;
-  setPromptFormat?: (value: string) => void;
+  promptStrucure?: string;
+  setPromptStrucure?: (value: string) => void;
   length: string;
   setLength: (value: string) => void;
   onGenerate: () => void;
@@ -18,8 +18,8 @@ const OutputDesign: React.FC<Props> = ({
   setReferences,
   outputFormat,
   setOutputFormat,
-  promptFormat,
-  setPromptFormat,
+  promptStrucure,
+  setPromptStrucure,
   length,
   setLength,
   onGenerate
@@ -31,7 +31,12 @@ const OutputDesign: React.FC<Props> = ({
 
       {/* Output Design Section */}
       <div className="rounded-lg p-6 border mt-6 border-gold/30">
-        <h2 className="font-semibold text-black mb-4">VI. Output Design: Specify format and structure</h2>
+           <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >VI. Output Design
+
+</strong>
+ </h2>
+    </div>
 
         <div className="grid grid-cols-2 gap-6 mb-4">
           <div>
@@ -84,13 +89,19 @@ const OutputDesign: React.FC<Props> = ({
 
       {/* Generate Prompt Section */}
       <div className="rounded-lg p-6 border border-gold/30">
-        <h2 className="font-semibold text-black mb-4">VII. Generate Prompt</h2>
+           <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >VII.  Prompt Structure
+:
+
+</strong>
+ </h2>
+    </div>
 
         <label className="block text-sm font-medium mb-2 text-gray-700">Select Structure</label>
         <select
           className="w-full px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm mb-4 focus:outline-gold"
-          value={promptFormat || ""}
-          onChange={(e) => setPromptFormat && setPromptFormat(e.target.value)}
+          value={promptStrucure || ""}
+          onChange={(e) => setPromptStrucure && setPromptStrucure(e.target.value)}
         >
           <option value="aichemist-formula">AICHEMIST Formula</option>
           <option value="json">JSON</option>

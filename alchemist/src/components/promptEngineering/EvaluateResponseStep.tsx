@@ -182,8 +182,13 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({
   };
 
   return (
-    <div className="w-full lg:max-w-md mx-auto bg-ivory rounded-lg p-6 space-y-6 border border-gold/30">
-      <h2 className="text-xl font-bold text-gray-800">Evaluate Response Quality</h2>
+    <div className="w-full lg:max-w-lg mx-auto bg-ivory rounded-lg p-6 space-y-6 border border-gold/30">
+         <div className="flex items-center mb-4">
+      <h2 className=" text-xl text-black mb-4"><strong >XI.  Evaluate Response
+
+</strong>
+ </h2>
+    </div>
 
       {/* Objective */}
       {showObjective && (

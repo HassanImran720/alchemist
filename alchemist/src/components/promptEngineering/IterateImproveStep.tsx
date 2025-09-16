@@ -6,12 +6,16 @@ interface IterateImproveStepProps {
   evaluation: any;
   originalPrompt: string;
   onImprove: (improvedPrompt: string) => void;
+  promptStrucure: string;
+  setPromptStrucure: (value: string) => void;
 }
 
 const IterateImproveStep: React.FC<IterateImproveStepProps> = ({
   evaluation,
   originalPrompt,
   onImprove,
+  promptStrucure,
+  setPromptStrucure,
 }) => {
   const [currentIteration, setCurrentIteration] = useState(1);
   const [charms] = useState(95);
@@ -21,27 +25,45 @@ const IterateImproveStep: React.FC<IterateImproveStepProps> = ({
   const handleGenerateImprovedPrompt = async () => {
     setIsGenerating(true);
 
-    setTimeout(() => {
-      const improved = `<instructions> You are a world-class sales strategist and revenue consultant with expertise in lead qualification, customer acquisition techniques, and buyer psychology. You tailor messaging to the decision-making stage of the customer journey. If critical information is unavailable, state that and provide specific directions. </instructions>
+   setTimeout(() => {
+  const improved = `<instructions>
+You are a sales strategist with expertise in lead qualification, customer acquisition, and buyer psychology. 
+Adapt messaging to the customer’s decision-making stage. 
+If info is missing, state it clearly and suggest next steps. 
+Keep responses clear, persuasive, and outcome-focused.
+</instructions>
 
-<task> EXAMPLE TASK. </task>
+<task>
+Write a persuasive outreach email for COMPANY that highlights unique benefits, addresses objections, and ends with a strong call-to-action to book a demo.
+</task>
 
-<approach> Do NOT copy, research far more than you normally would. Review up to 200 webpages if needed—it's worth it due to the direct revenue impact for COMPANY. Don't just look at articles; evaluate competitor sales content, customer testimonials, and sales enablement tools. Understand buyer psychology, funnel weaknesses, and sales objections from all available sources. </approach>
+<approach>
+1. Research competitor sales pages and customer reviews.  
+2. Identify common objections and pain points.  
+3. Apply buyer psychology and urgency triggers.  
+4. Provide subject line and CTA variations.  
+</approach>
 
-<context> Company Name: JOHN APPLE; Target Customer Persona: JOHN BROWN; Decision-Making Stage: ACTIVE BUYER; Industry or Sector: TOURISM </context>
+<context>
+Company: JOHN APPLE  
+Target Persona: JOHN BROWN  
+Stage: ACTIVE BUYER  
+Industry: TOURISM  
+Pain Points: High acquisition cost, low conversion rates.  
+</context>
 
-<references> Name    Age Location    Email    Interest
-Ava Noorforde    29  Dallas, TX    ava.noorforde@email.com    Wellness Coaching
-Liam Bennett    35  Denver, CO  liam.bennett@email.com  Tech Startups
-Joe Kim 26  Seattle, WA  z.kim@email.com    Mindfulness
-Elijah Morgan   41  Chicago, IL e.morgan@email.com    Writing
-Maya Patel  32  San Diego, CA   maya.patel@email.com    Biohacking </references>`;
+<references>
+- Ava Noorforde, 29, Dallas, TX – Wellness Coaching  
+- Liam Bennett, 35, Denver, CO – Tech Startups  
+- Joe Kim, 26, Seattle, WA – Mindfulness  
+</references>`;
 
-      setImprovedPrompt(improved);
-      onImprove(improved);
-      setIsGenerating(false);
-      setCurrentIteration((prev) => prev + 1);
-    }, 3000);
+  setImprovedPrompt(improved);
+  onImprove(improved);
+  setIsGenerating(false);
+  setCurrentIteration((prev) => prev + 1);
+}, 3000);
+
   };
 
   const handleCopy = () => {
@@ -64,18 +86,24 @@ Maya Patel  32  San Diego, CA   maya.patel@email.com    Biohacking </references>
         </h2>
       </div>
 
-      {/* Iteration Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 p-3 bg-gray-50 rounded-md gap-3">
-        <div>
-          <span className="text-sm text-gray-600">Current Iteration: </span>
-          <span className="font-semibold">{currentIteration}</span>
-          <div className="text-xs text-gray-500">1 improvement applied</div>
-        </div>
-        <div className="flex items-center gap-2 text-sm sm:text-base">
-          <span className="text-gold">⚡</span>
-          <span className="font-medium">{charms} Charms</span>
-          <div className="text-xs text-gray-500">5 charms per iteration</div>
-        </div>
+      {/* Prompt Structure Dropdown */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2 text-gray-700">
+          Select Structure
+        </label>
+        <select
+          className="w-full px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm mb-4 focus:outline-gold"
+          value={promptStrucure || ""}
+          onChange={(e) => setPromptStrucure(e.target.value)}
+        >
+          <option value="aichemist-formula">AICHEMIST Formula</option>
+          <option value="json">JSON</option>
+          <option value="yaml">YAML</option>
+          <option value="plain-text">Plain Text</option>
+          <option value="javascript-jsx">JavaScript/JSX</option>
+          <option value="toml">TOML</option>
+          <option value="markdown">Markdown</option>
+        </select>
       </div>
 
       {/* Generate Button */}
@@ -127,29 +155,6 @@ Maya Patel  32  San Diego, CA   maya.patel@email.com    Biohacking </references>
               Save to Library
             </button>
           </div>
-
-          {/* Description */}
-          <div className="text-xs sm:text-sm text-gray-600 p-3 bg-blue-50 rounded-md">
-            Creates a new text box with your original prompt plus{" "}
-            &lt;evaluation&gt; and &lt;iteration&gt; blocks with constructive
-            improvement suggestions.
-          </div>
-
-          {/* Generate Another Iteration */}
-          <button
-            onClick={handleGenerateImprovedPrompt}
-            disabled={isGenerating}
-            className="w-full bg-gold hover:bg-gold/90 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 py-3 sm:px-6 rounded-md font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            {isGenerating ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-ivory"></div>
-            ) : (
-              <RefreshCw className="w-5 h-5" />
-            )}
-            {isGenerating
-              ? "Improving Prompt (5 Charms)..."
-              : `Generate Improved Prompt (5 Charms)`}
-          </button>
         </div>
       )}
     </div>
