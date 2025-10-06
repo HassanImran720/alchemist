@@ -61,7 +61,7 @@ export default function SubscribeModal({ open, onClose, onSuccess }: Props) {
           </h2>
           <p className="text-sm sm:text-lg text-gray max-w-xl mx-auto">
             But your transformation has already begun. Subscribe for early
-            access and launch updates - arriving September 2025.
+            access and launch updates - arriving October 2025.
           </p>
         </div>
 

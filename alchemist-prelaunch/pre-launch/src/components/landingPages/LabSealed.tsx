@@ -39,7 +39,7 @@ const LabSealed = () => {
       </div>
 
       <p className="text-xs sm:text-sm text-gray mt-7 max-w-md sm:mt-10 whitespace-nowrap">
-        Launching September 2025 – join now for insights and first access.
+        Launching October 2025 – join now for insights and first access.
       </p>
     </section>
   );
