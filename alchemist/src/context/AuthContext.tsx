@@ -106,7 +106,7 @@ const register = async (
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
-    router.push("/login");
+    router.push("/");
   };
 
   useEffect(() => {

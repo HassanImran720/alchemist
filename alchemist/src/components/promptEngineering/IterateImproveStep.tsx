@@ -75,17 +75,14 @@ Pain Points: High acquisition cost, low conversion rates.
   };
 
   return (
-    <div className="bg-ivory rounded-lg border border-gold/30 p-4 sm:p-6 lg:p-8 mb-6">
+    <div className="rounded-xl border border-gold/30 p-2 md:p-4 mb-4 ">
       {/* Heading */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 bg-gold rounded-full flex items-center justify-center text-white font-bold ">
-          9
-        </div>
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-charcoal">
-          Iterate & Improve
+    
+ <div className="flex items-center mb-3 sm:mb-4">
+        <h2 className="text-base sm:text-lg text-black mb-3 sm:mb-4">
+          <strong>XII. Iterate and Improve</strong>
         </h2>
       </div>
-
       {/* Prompt Structure Dropdown */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2 text-gray-700">

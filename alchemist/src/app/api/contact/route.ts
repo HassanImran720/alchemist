@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   try {
     const { name, email, subject, message } = await req.json();
-
+console.log(name, email, subject, message);
     if (!name || !email || !message) {
       return NextResponse.json(
         { message: "Missing required fields (name, email, message)" },
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
           <p><strong>Your submitted message:</strong><br/>"${message}"</p>
           <br/>
           <p>Best regards,<br/>Support Team</p>
-          <img src="cid:logo" alt="Company Logo" style="width:120px; margin-top:10px;" />
+
         </div>
       `,
       // attachments: [

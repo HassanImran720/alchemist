@@ -1,0 +1,79 @@
+"use client";
+import React from "react";
+
+interface PromptTemplate {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+}
+
+const SamplePrompting: React.FC = () => {
+  const promptTemplates: PromptTemplate[] = [
+    { id: "marketing", category: "MARKETING", title: "Brand Voice Formula", description: "Create consistent brand messaging" },
+    { id: "sales", category: "SALES", title: "Lead Generation", description: "Convert prospects into customers" },
+    { id: "content", category: "CONTENT CREATION", title: "Blog Templates", description: "Structured content creation" },
+    { id: "operations", category: "OPERATIONS", title: "Workflow Design", description: "Optimize business processes" },
+  ];
+
+  const blueprintCategories = [
+    "MARKETING", "REAL ESTATE", "MORE",
+    "SALES", "FINANCE", "MORE",
+    "CONTENT CREATION", "LEAD GENERATION", "MORE",
+    "OPERATIONS", "SIRI", "MORE",
+    "CUSTOMER SUPPORT", "ARCHITECTURE", "MORE",
+    "ENGINEERING", "MATHEMATICS", "MORE",
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Prompt Templates List */}
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {promptTemplates.map((template) => (
+          <div
+            key={template.id}
+            className="rounded-xl border-[0.5px] border-gold/30 p-5 hover:shadow-md transition-shadow"
+          >
+          
+            <div className="mb-2">
+              <span className="inline-block rounded-full border-[0.5px] border-gold/30 px-3 py-1 text-xs font-medium text-charcoal">
+                {template.category}
+              </span>
+            </div>
+
+            
+            <h3 className="text-base font-semibold text-charcoal">{template.title}</h3>
+
+            
+            <p className="mt-1 text-sm text-gray">{template.description}</p>
+          </div>
+        ))}
+      </div> */}
+
+      {/* Blueprint Categories (if you want to enable later) */}
+      
+      <div>
+      
+
+        <div className="mb-6 text-center">
+          <h3 className="text-gray mb-4 text-lg">GET INSPIRATION FROM THE <br/>FOLLOWING PROMPTS</h3>
+          <div className="text-black font-semibold mb-6">CHOOSE YOUR CATEGORY</div>
+        </div>
+
+        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3">
+          {blueprintCategories.map((category, index) => (
+            <button
+              key={index}
+              className="bg-gold text-black py-3 px-4 rounded font-medium text-sm hover:bg-gold/90 transition-colors"
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      </div>
+     
+    </div>
+  );
+};
+
+export default SamplePrompting;

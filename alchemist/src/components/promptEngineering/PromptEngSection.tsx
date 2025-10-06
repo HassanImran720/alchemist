@@ -26,9 +26,10 @@ import {
 export type ContextData = {
   [key: string]: any;
   dynamicFields?: Record<string, any>;
-  customFields?: string[];
+  customFieldsByGroup?: Record<string, string[]>; // ✅ added
   freeformContext?: string;
 };
+
 
 interface EvaluationData {
   objective: boolean;
@@ -180,7 +181,7 @@ const PromptEngSection: React.FC = () => {
       </div>
 
       {/* Steps Section */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <DefineObjective
           taskObjective={taskObjective}
           setTaskObjective={setTaskObjective}
@@ -238,7 +239,7 @@ const PromptEngSection: React.FC = () => {
                 {showTestResponse && (
                   <>
                     {/* Test + Evaluate Section */}
-                    <div className="flex flex-col lg:flex-row w-full space-x-20  mt-6">
+                    <div className="flex flex-col lg:flex-row w-full space-x-0 lg:space-x-3  mt-6">
                       <div className="w-full lg:w-1/2 h-full flex">
                         <div className="flex-1 h-full">
                           <TestAIResponseStep
@@ -251,17 +252,15 @@ const PromptEngSection: React.FC = () => {
                       <div className="w-full lg:w-1/2 h-full flex">
                         <div className="flex-1 h-full">
                           <EvaluateResponseStep
-                            aiResponse={
-                              aiResponse || "Sample AI response for testing"
-                            }
-                            onEvaluationComplete={handleEvaluationComplete}
+                         
+                         
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Iterate + Improve Section */}
-                    <div className="mt-6">
+                    <div className="">
                       <IterateImproveStep
                         evaluation={
                           evaluation || {

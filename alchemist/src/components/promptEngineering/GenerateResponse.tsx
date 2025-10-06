@@ -66,9 +66,9 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
 };
 
   return (
-    <div className="bg-ivory rounded-lg p-4 sm:p-6 mb-6 border-[0.5px] border-gold/30">
-       <div className="flex items-center mb-4">
-      <h2 className=" text-xl text-black mb-4"><strong >IX. Generate Response
+    <div className="rounded-xl border border-gold/30 p-2 md:p-4 mb-4 ">
+       <div className="flex items-center mb-2">
+      <h2 className=" text-base sm:text-lg text-black mb-3 sm:mb-1"><strong >IX. Generate Response
 
 </strong>
  </h2>

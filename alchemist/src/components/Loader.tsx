@@ -10,7 +10,7 @@ export default function Loader() {
       <div className="flex flex-col items-center justify-center space-y-4">
         {/* Logo */}
         <Image
-          src="/withBgBackground.png"
+          src="/WithBgBackground.png"
           alt="Logo"
           width={200}
           height={200}
