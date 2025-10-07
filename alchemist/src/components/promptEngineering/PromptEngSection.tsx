@@ -79,6 +79,95 @@ const PromptEngSection: React.FC = () => {
     setAiResponse("");
   };
 
+  // Client-side call to generate prompt via API
+  const generatePromptFromServer = async () => {
+    try {
+      const body = {
+        mode: selectedContext === "flowmode" ? "flow" : "guided",
+        schema: selectedContext === "guidedmode" ? "sales" : "content",
+        task: taskObjective,
+        contextData,
+        fields: contextData?.dynamicFields || {},
+        insertReferences,
+        references,
+        format: outputFormat,
+        toneData,
+        promptStructure: promptStrucure,
+        length,
+      } as any;
+
+      const res = await fetch("/api/prompt/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const prompt = data.prompt || "";
+      handlePromptGenerated(prompt);
+      return prompt;
+    } catch (err: any) {
+      console.error("generatePrompt error", err);
+      return "";
+    }
+  };
+
+  // Client-side call to generate AI response from a prompt
+  const generateResponseFromServer = async (prompt?: string) => {
+    try {
+      const sendPrompt = prompt || generatedPrompt;
+      if (!sendPrompt) return;
+
+      const res = await fetch("/api/prompt/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: sendPrompt, maxTokens: 800 }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAiResponse(data.text || "");
+      setShowTestResponse(true);
+      return data.text;
+    } catch (err: any) {
+      console.error("generateResponse error", err);
+      return "";
+    }
+  };
+
+  // Send evaluation + original prompt to the server to get an improved prompt
+  const improvePromptFromServer = async (evaluationData: any) => {
+    try {
+      const body = {
+        originalPrompt: generatedPrompt,
+        evaluation: evaluationData,
+        references,
+        format: outputFormat,
+      };
+
+      const res = await fetch('/api/prompt/improve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      const newPrompt = data.prompt || '';
+      if (newPrompt) {
+        setGeneratedPrompt(newPrompt);
+        // also reset aiResponse so user can re-test
+        setAiResponse('');
+        setShowTestResponse(false);
+      }
+      return newPrompt;
+    } catch (err: any) {
+      console.error('improvePrompt error', err);
+      return '';
+    }
+  };
+
   const renderContextStep = () => {
     if (!selectedContext) return null; // 👈 by default nothing
 
@@ -213,26 +302,36 @@ const PromptEngSection: React.FC = () => {
               setPromptStrucure={setPromptStrucure}
               length={length}
               setLength={setLength}
-              onGenerate={() => setShowOutputForm(true)}
+              onGenerate={async () => {
+                await generatePromptFromServer();
+                setShowOutputForm(true);
+              }}
             />
 
             {showOutputForm && (
               <>
-                <GeneratedPromptStep
+                {/* <GeneratedPromptStep
                   taskDescription={taskObjective}
                   selectedContext={selectedContext}
                   contextData={contextData}
                   references={references}
                   outputFormat={outputFormat}
                   onPromptGenerated={handlePromptGenerated}
-                />
-
+                /> */}
+{showOutputForm && (
+        <GeneratedPromptStep
+          externalPrompt={generatedPrompt} // ✅ only show backend prompt
+        />
+      )}
                 {/* yaha per ye compoennt rakhan ha resposne genrated ka */}
                 <GenerateResponse
                   generatedPrompt={generatedPrompt}
-                  onResponseGenerated={(response) => {
-                    setAiResponse(response); // set AI response
-                    setShowTestResponse(true); // show TestAIResponseStep
+                  onGenerateResponse={async (prompt?: string) => {
+                    const text = await generateResponseFromServer(prompt);
+                    if (text) {
+                      setShowTestResponse(true);
+                    }
+                    return text;
                   }}
                 />
 
@@ -251,10 +350,7 @@ const PromptEngSection: React.FC = () => {
 
                       <div className="w-full lg:w-1/2 h-full flex">
                         <div className="flex-1 h-full">
-                          <EvaluateResponseStep
-                         
-                         
-                          />
+                          <EvaluateResponseStep onRequestImprove={improvePromptFromServer} />
                         </div>
                       </div>
                     </div>

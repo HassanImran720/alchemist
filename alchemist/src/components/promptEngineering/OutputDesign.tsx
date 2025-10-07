@@ -131,6 +131,7 @@
 
 "use client";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface Props {
   references: string;
@@ -141,7 +142,7 @@ interface Props {
   setPromptStrucure?: (value: string) => void;
   length: string;
   setLength: (value: string) => void;
-  onGenerate: () => void;
+  onGenerate: () => Promise<void> | void;
 }
 
 const OutputDesign: React.FC<Props> = ({
@@ -156,6 +157,19 @@ const OutputDesign: React.FC<Props> = ({
   onGenerate,
 }) => {
   const [includeEmojis, setIncludeEmojis] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleGenerateClick = async () => {
+    try {
+      setLoading(true);
+      await onGenerate();
+    } catch (err) {
+      // swallow - parent handles errors
+      console.error("OutputDesign onGenerate error", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="">
@@ -248,10 +262,22 @@ const OutputDesign: React.FC<Props> = ({
         </select>
 
         <button
-          onClick={onGenerate}
-          className="w-full bg-gold text-white py-3 rounded-md text-sm font-medium hover:bg-yellow-600 transition"
+          onClick={handleGenerateClick}
+          disabled={loading}
+          className={`w-full py-3 rounded-md text-sm font-medium transition ${
+            loading
+              ? "bg-white text-gold border border-gold/30"
+              : "bg-gold text-white hover:bg-yellow-600"
+          }`}
         >
-          Generate Prompt
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <Loader2 className="w-4 h-4 animate-spin mr-2 text-gold" />
+              Generating...
+            </span>
+          ) : (
+            "Generate Prompt"
+          )}
         </button>
       </div>
     </div>

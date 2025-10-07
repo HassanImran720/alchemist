@@ -1037,7 +1037,8 @@
 import React, { useState } from "react";
 
 interface EvaluateResponseStepProps {
- 
+  // Parent provides a function that takes the evaluation object and returns an improved prompt
+  onRequestImprove?: (evaluation: any) => Promise<string | undefined>;
 }
 
 interface EvaluationData {
@@ -1053,13 +1054,12 @@ interface EvaluationData {
   categoryIssues: Record<string, string[]>;
 }
 
-const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({
-
-}) => {
+const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestImprove }) => {
   const [showObjective, setShowObjective] = useState(true);
   const [rewriteObjective, setRewriteObjective] = useState("");
   const [scoreGenerated, setScoreGenerated] = useState(false);
   const [evaluationStarted, setEvaluationStarted] = useState(false);
+  const [improving, setImproving] = useState(false);
 
   const [evaluation, setEvaluation] = useState<EvaluationData>({
     objective: true,
@@ -1203,7 +1203,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({
   };
 
   const generateNewPrompt = () => {
-    // onEvaluationComplete(evaluation);
+    // placeholder: parent will be called via onRequestImprove prop
   };
 
   return (
@@ -1624,13 +1624,36 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({
         )}
 
         {scoreGenerated && (
-          <button
-            type="button"
-            onClick={generateNewPrompt}
-            className="w-full bg-gold text-white py-2 rounded font-semibold text-xs"
-          >
-            GENERATE NEW PROMPT
-          </button>
+          <div className="space-y-2">
+            <button
+              type="button"
+              onClick={generateNewPrompt}
+              className="w-full bg-gold text-white py-2 rounded font-semibold text-xs"
+            >
+              GENERATE NEW PROMPT
+            </button>
+
+            {/* Reiterate Prompt - calls parent to create an improved prompt based on evaluation */}
+            <button
+              type="button"
+              onClick={async () => {
+                if (!onRequestImprove) return;
+                setImproving(true);
+                try {
+                  await onRequestImprove(evaluation);
+                } catch (e) {
+                  console.error('reiterate error', e);
+                } finally {
+                  setImproving(false);
+                }
+              }}
+              className={`w-full py-2 rounded font-semibold text-xs flex items-center justify-center gap-2 ${
+                improving ? 'bg-white text-gold border border-gold/30' : 'bg-gold text-white'
+              }`}
+            >
+              {improving ? 'Reiterating...' : 'Reiterate Prompt'}
+            </button>
+          </div>
         )}
       </div>
     </div>
