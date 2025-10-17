@@ -1,13 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
+import { usePromptEng } from "../../context/PromptEngContext";
 import DefineObjective from "./DefineObjective";
 import ChoosePath from "./ChoosePath";
 import BusinessContextStep from "./BusinessContextStep";
 import FreeformContextStep from "./FreeformContextStep";
 import OutputDesign from "./OutputDesign";
 import GeneratedPromptStep from "./GeneratedPromptStep";
-import TestAIResponseStep from "./ViewResponse";
 import EvaluateResponseStep from "./EvaluateResponseStep";
 import IterateImproveStep from "./IterateImproveStep";
 import SetToneStep from "./SetToneStep";
@@ -21,7 +21,11 @@ import {
   FileText,
   Sparkles,
   RefreshCcw,
+  View,
 } from "lucide-react";
+import ViewResponse from "./ViewResponse";
+import SavePromptModal from "./SavePromptModal";
+import { useState } from "react";
 
 export type ContextData = {
   [key: string]: any;
@@ -44,129 +48,57 @@ interface EvaluationData {
 }
 
 const PromptEngSection: React.FC = () => {
-  const [taskObjective, setTaskObjective] = useState("");
-  const [selectedContext, setSelectedContext] = useState<
-    "flowmode" | "guidedmode" | null
-  >(null);
-  const [contextData, setContextData] = useState<ContextData>({});
-  const [insertReferences, setInsertReferences] = useState("");
-  const [references, setReferences] = useState("");
-  const [outputFormat, setOutputFormat] = useState("");
-  const [promptStrucure, setPromptStrucure] = useState("");
-  const [length, setLength] = useState("");
-  const [showOutputForm, setShowOutputForm] = useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [evaluation, setEvaluation] = useState<EvaluationData | null>(null);
-  const [toneData, setToneData] = useState<string[]>([]);
-  const [showTestResponse, setShowTestResponse] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
+  const {
+    // State from context
+    taskObjective,
+    setTaskObjective,
+    selectedContext,
+    setSelectedContext,
+    contextData,
+    setContextData,
+    insertReferences,
+    setInsertReferences,
+    references,
+    setReferences,
+    outputFormat,
+    setOutputFormat,
+    promptStructure,
+    setPromptStructure,
+    length,
+    setLength,
+    showOutputForm,
+    setShowOutputForm,
+    generatedPrompt,
+    aiResponse,
+    evaluation,
+    toneData,
+    setToneData,
+    showTestResponse,
+    setShowTestResponse,
+    showInstructions,
+    setShowInstructions,
+    
+    // API functions from context
+    generatePromptFromServer,
+    generateResponseFromServer,
+    improvePromptFromServer,
+  savePromptToLibrary,
+  isSavingPrompt,
+    
+    // Handler functions from context
+    handlePromptGenerated,
+    handleTestComplete,
+    handleEvaluationComplete,
+    handleImprove,
+    
+    // Loading states
+    isGeneratingPrompt,
+    isGeneratingResponse,
+    isImprovingPrompt,
+  } = usePromptEng();
 
-  const handlePromptGenerated = (prompt: string) => {
-    setGeneratedPrompt(prompt);
-  };
-
-  const handleTestComplete = (response: string) => {
-    setAiResponse(response);
-  };
-
-  const handleEvaluationComplete = (evaluationData: EvaluationData) => {
-    setEvaluation(evaluationData);
-  };
-
-  const handleImprove = (improvedPrompt: string) => {
-    setGeneratedPrompt(improvedPrompt);
-    setAiResponse("");
-  };
-
-  // Client-side call to generate prompt via API
-  const generatePromptFromServer = async () => {
-    try {
-      const body = {
-        mode: selectedContext === "flowmode" ? "flow" : "guided",
-        schema: selectedContext === "guidedmode" ? "sales" : "content",
-        task: taskObjective,
-        contextData,
-        fields: contextData?.dynamicFields || {},
-        insertReferences,
-        references,
-        format: outputFormat,
-        toneData,
-        promptStructure: promptStrucure,
-        length,
-      } as any;
-
-      const res = await fetch("/api/prompt/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      const prompt = data.prompt || "";
-      handlePromptGenerated(prompt);
-      return prompt;
-    } catch (err: any) {
-      console.error("generatePrompt error", err);
-      return "";
-    }
-  };
-
-  // Client-side call to generate AI response from a prompt
-  const generateResponseFromServer = async (prompt?: string) => {
-    try {
-      const sendPrompt = prompt || generatedPrompt;
-      if (!sendPrompt) return;
-
-      const res = await fetch("/api/prompt/respond", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: sendPrompt, maxTokens: 800 }),
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      setAiResponse(data.text || "");
-      setShowTestResponse(true);
-      return data.text;
-    } catch (err: any) {
-      console.error("generateResponse error", err);
-      return "";
-    }
-  };
-
-  // Send evaluation + original prompt to the server to get an improved prompt
-  const improvePromptFromServer = async (evaluationData: any) => {
-    try {
-      const body = {
-        originalPrompt: generatedPrompt,
-        evaluation: evaluationData,
-        references,
-        format: outputFormat,
-      };
-
-      const res = await fetch('/api/prompt/improve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-      const newPrompt = data.prompt || '';
-      if (newPrompt) {
-        setGeneratedPrompt(newPrompt);
-        // also reset aiResponse so user can re-test
-        setAiResponse('');
-        setShowTestResponse(false);
-      }
-      return newPrompt;
-    } catch (err: any) {
-      console.error('improvePrompt error', err);
-      return '';
-    }
-  };
+  // Local UI state for Save modal (moved here so modal covers entire area and can blur background)
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   const renderContextStep = () => {
     if (!selectedContext) return null; // 👈 by default nothing
@@ -269,8 +201,8 @@ const PromptEngSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Steps Section */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+  {/* Steps Section */}
+  <div className={`max-w-4xl mx-auto px-4 py-8 ${showSaveModal ? 'filter blur-sm pointer-events-none select-none' : ''}`}>
         <DefineObjective
           taskObjective={taskObjective}
           setTaskObjective={setTaskObjective}
@@ -298,13 +230,19 @@ const PromptEngSection: React.FC = () => {
               setReferences={setReferences}
               outputFormat={outputFormat}
               setOutputFormat={setOutputFormat}
-              promptStrucure={promptStrucure}
-              setPromptStrucure={setPromptStrucure}
               length={length}
               setLength={setLength}
               onGenerate={async () => {
-                await generatePromptFromServer();
-                setShowOutputForm(true);
+                try {
+                  await generatePromptFromServer();
+                  setShowOutputForm(true);
+                } catch (err: any) {
+                  console.error('generatePromptFromServer failed', err);
+                  // Show a clear message so mobile users / QA know why nothing happened
+                  const message = err?.message || 'Failed to generate prompt. Please check your network or login status.';
+                  // Using alert for now so it surfaces in environments without a toast system.
+                  if (typeof window !== 'undefined') window.alert(message);
+                }
               }}
             />
 
@@ -340,10 +278,10 @@ const PromptEngSection: React.FC = () => {
                     {/* Test + Evaluate Section */}
                     <div className="flex flex-col lg:flex-row w-full space-x-0 lg:space-x-3  mt-6">
                       <div className="w-full lg:w-1/2 h-full flex">
-                        <div className="flex-1 h-full">
-                          <TestAIResponseStep
+                        <div className={`flex-1 h-full ${showSaveModal ? 'filter blur-sm pointer-events-none select-none' : ''}`}>
+                          <ViewResponse
                             aiResponse={aiResponse}
-                            onTestComplete={setAiResponse}
+                            onOpenSaveModal={() => setShowSaveModal(true)}
                           />
                         </div>
                       </div>
@@ -356,7 +294,7 @@ const PromptEngSection: React.FC = () => {
                     </div>
 
                     {/* Iterate + Improve Section */}
-                    <div className="">
+                    {/* <div className="">
                       <IterateImproveStep
                         evaluation={
                           evaluation || {
@@ -374,10 +312,9 @@ const PromptEngSection: React.FC = () => {
                         }
                         originalPrompt={generatedPrompt || "Sample prompt"}
                         onImprove={handleImprove}
-                        promptStrucure={promptStrucure}
-                        setPromptStrucure={setPromptStrucure}
+                
                       />
-                    </div>
+                    </div> */}
                   </>
                 )}
               </>
@@ -385,6 +322,22 @@ const PromptEngSection: React.FC = () => {
           </>
         )}
       </div>
+      {/* Global Save Prompt Modal rendered at section level so overlay can blur the whole section */}
+      <SavePromptModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={async (title: string) => {
+          try {
+            await savePromptToLibrary(title);
+            setShowSaveModal(false);
+          } catch (err) {
+            console.error('Save from modal failed', err);
+            // leave modal open so user can retry or cancel
+            throw err;
+          }
+        }}
+        isLoading={isSavingPrompt}
+      />
     </div>
   );
 };

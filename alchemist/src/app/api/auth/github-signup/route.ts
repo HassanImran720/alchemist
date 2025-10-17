@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import UserModel from "@/db/models/User";
-import jwt from "jsonwebtoken";
+import { signJwt } from "@/helpers/jwt";
 import dbConnect from "@/db/dbConnect"; // <- connect import
 
 export async function POST(req: NextRequest) {
@@ -52,7 +52,11 @@ export async function POST(req: NextRequest) {
       emailVerified: true,
     });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    const token = signJwt({ 
+      id: newUser._id, 
+      email: newUser.email, 
+      authMethod: newUser.authMethod 
+    });
     return NextResponse.json({ token, user: newUser });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

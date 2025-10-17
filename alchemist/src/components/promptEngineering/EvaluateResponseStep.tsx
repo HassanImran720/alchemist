@@ -1035,6 +1035,7 @@
 
 "use client";
 import React, { useState } from "react";
+import { usePromptEng } from "../../context/PromptEngContext";
 
 interface EvaluateResponseStepProps {
   // Parent provides a function that takes the evaluation object and returns an improved prompt
@@ -1042,7 +1043,7 @@ interface EvaluateResponseStepProps {
 }
 
 interface EvaluationData {
-  objective: boolean;
+  objective?: boolean;
   rewrittenObjective?: string;
   inputs: Record<string, { status: string; issues: string[] }>;
   completeness: number;
@@ -1060,14 +1061,16 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
   const [scoreGenerated, setScoreGenerated] = useState(false);
   const [evaluationStarted, setEvaluationStarted] = useState(false);
   const [improving, setImproving] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const [evaluation, setEvaluation] = useState<EvaluationData>({
-    objective: true,
+    objective: undefined,
+    // INPUT STATUS intentionally empty so user must choose
     inputs: {
-      audience: { status: "No Issues", issues: [] },
-      contentGoal: { status: "No Issues", issues: [] },
-      coreMessage: { status: "No Issues", issues: [] },
-      audienceMotivation: { status: "No Issues", issues: [] },
+      audience: { status: "", issues: [] },
+      contentGoal: { status: "", issues: [] },
+      coreMessage: { status: "", issues: [] },
+      audienceMotivation: { status: "", issues: [] },
     },
     completeness: 0,
     tone: 0,
@@ -1096,6 +1099,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
 
   const updateObjective = (value: boolean) => {
     setEvaluation((prev) => ({ ...prev, objective: value }));
+    setValidationErrors([]);
   };
 
   const updateInputStatus = (field: string, value: string) => {
@@ -1106,6 +1110,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
         [field]: { ...prev.inputs[field], status: value },
       },
     }));
+    setValidationErrors([]);
   };
 
   const ensurePendingIssuesAdded = () => {
@@ -1126,10 +1131,12 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
     updatedInputs[field].issues.push(issueText);
     setEvaluation({ ...evaluation, inputs: updatedInputs });
     setInputIssueTexts({ ...inputIssueTexts, [field]: "" });
+    setValidationErrors([]);
   };
 
   const updateCategoryRating = (category: string, value: number) => {
     setEvaluation((prev) => ({ ...prev, [category]: value }));
+    setValidationErrors([]);
   };
 
   const addCategoryIssue = (category: string) => {
@@ -1143,6 +1150,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
       },
     }));
     setCategoryIssueTexts({ ...categoryIssueTexts, [category]: "" });
+    setValidationErrors([]);
   };
 
   const updateCategoryIssueText = (category: string, value: string) => {
@@ -1150,6 +1158,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
   };
 
   const getInputBoxColor = (status: string) => {
+    if (!status || status === "") return "bg-white border-bg-gold/30";
     if (status === "No Issues") return "bg-green-100 border-green-500";
     if (status === "Minor Issues") return "bg-yellow-100 border-yellow-500";
     return "bg-red-100 border-red-500";
@@ -1178,16 +1187,31 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
 
   const generateScore = () => {
     const updatedInputs = ensurePendingIssuesAdded();
+    const errors: string[] = [];
 
     for (const [key, input] of Object.entries(updatedInputs)) {
-      if ((input.status === "Minor Issues" || input.status === "Major Issues") && input.issues.length === 0) {
-        alert(`Please add at least one issue for ${inputFields.find(f => f.key === key)?.label}`);
-        return;
+      if (!input.status || input.status === "") {
+        errors.push(`Select a status for ${inputFields.find(f => f.key === key)?.label}`);
+      } else if ((input.status === "Minor Issues" || input.status === "Major Issues") && input.issues.length === 0) {
+        errors.push(`Add at least one issue for ${inputFields.find(f => f.key === key)?.label}`);
       }
     }
 
-    if (!evaluation.objective && !rewriteObjective.trim()) {
-      alert("Please rewrite the objective or select 'YES'");
+    if (evaluation.objective === undefined) {
+      errors.push("Select YES or NO for Objective.");
+    } else if (evaluation.objective === false && !rewriteObjective.trim()) {
+      errors.push("Rewrite Objective is required when Objective is NO.");
+    }
+
+    const requiredCats = ["completeness", "tone", "presentation", "verbosity", "other"];
+    for (const c of requiredCats) {
+      if (!(evaluation as any)[c] || (evaluation as any)[c] <= 0) {
+        errors.push(`Rate ${c} (1-5).`);
+      }
+    }
+
+    if (errors.length > 0) {
+      setValidationErrors(errors);
       return;
     }
 
@@ -1199,6 +1223,12 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
       rewrittenObjective: !evaluation.objective ? rewriteObjective : undefined,
     };
     setEvaluation(finalEval);
+    // also update global context so save will include evaluation
+    try {
+      handleEvaluationComplete(finalEval as any);
+    } catch (e) {
+      // ignore
+    }
     setScoreGenerated(true);
   };
 
@@ -1206,8 +1236,19 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
     // placeholder: parent will be called via onRequestImprove prop
   };
 
+  // use context for prompt/response and promptStructure selection
+  const { promptStructure, setPromptStructure, generatedPrompt, aiResponse, taskObjective, handleEvaluationComplete } = usePromptEng();
+
   return (
     <div className="max-w-3xl border border-gold/30 mx-auto p-4 flex flex-col gap-2 mb-3 bg-ivory rounded-xl">
+      
+           {/* Header */}
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h2 className="text-sm sm:text-base md:text-lg text-black font-semibold">
+          <strong>XI. Evaluate Response:</strong>
+        </h2>
+      </div>
+      
       {/* OBJECTIVE */}
       <div className="bg-ivory border border-gold/30 rounded p-4 shadow-sm">
         <button
@@ -1230,7 +1271,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
                 type="button"
                 onClick={() => updateObjective(true)}
                 className={`px-4 py-1 rounded text-xs font-semibold border-2 ${
-                  evaluation.objective
+                  evaluation.objective === true
                     ? "bg-green-100 border-green-500"
                     : "bg-white border-bg-gold/30"
                 }`}
@@ -1241,7 +1282,7 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
                 type="button"
                 onClick={() => updateObjective(false)}
                 className={`px-4 py-1 rounded text-xs font-semibold border-2 ${
-                  !evaluation.objective
+                  evaluation.objective === false
                     ? "bg-red-100 border-red-500"
                     : "bg-white border-bg-gold/30"
                 }`}
@@ -1298,9 +1339,10 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
                     onChange={(e) => updateInputStatus(field.key, e.target.value)}
                     className="w-full border border-bg-gold/30 rounded px-2 py-1 text-xs bg-white"
                   >
-                    <option>No Issues</option>
-                    <option>Minor Issues</option>
-                    <option>Major Issues</option>
+                    <option value="">Select option</option>
+                    <option value="No Issues">No Issues</option>
+                    <option value="Minor Issues">Minor Issues</option>
+                    <option value="Major Issues">Major Issues</option>
                   </select>
 
                   {(evaluation.inputs[field.key].status === "Minor Issues" ||
@@ -1601,9 +1643,21 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
 
       {/* SCORE */}
       <div className="flex flex-col gap-2">
+        {/* Inline validation errors */}
+        {validationErrors.length > 0 && (
+          <div className="mb-3 text-sm text-red-600">
+            {validationErrors.map((err, idx) => (
+              <div key={idx}>• {err}</div>
+            ))}
+          </div>
+        )}
+
         <button
           type="button"
-          onClick={generateScore}
+          onClick={() => {
+            setValidationErrors([]);
+            generateScore();
+          }}
           className="w-full bg-gold text-white py-2 rounded font-semibold text-xs"
         >
           GENERATE SCORE
@@ -1625,22 +1679,71 @@ const EvaluateResponseStep: React.FC<EvaluateResponseStepProps> = ({ onRequestIm
 
         {scoreGenerated && (
           <div className="space-y-2">
-            <button
+            {/* <button
               type="button"
               onClick={generateNewPrompt}
               className="w-full bg-gold text-white py-2 rounded font-semibold text-xs"
             >
               GENERATE NEW PROMPT
-            </button>
+            </button> */}
+
+            {/* Prompt Structure selector (required before reiteration) */}
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-2 text-gray-700">Select Structure</label>
+              <select
+                className="w-full px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm mb-2 focus:outline-gold"
+                value={promptStructure || ""}
+                onChange={(e) => setPromptStructure(e.target.value)}
+              >
+                <option value="">Select structure</option>
+                <option value="aichemist-formula">AICHEMIST Formula</option>
+                <option value="json">JSON</option>
+                <option value="yaml">YAML</option>
+                <option value="plain-text">Plain Text</option>
+                <option value="javascript-jsx">JavaScript/JSX</option>
+                <option value="toml">TOML</option>
+                <option value="markdown">Markdown</option>
+              </select>
+            </div>
 
             {/* Reiterate Prompt - calls parent to create an improved prompt based on evaluation */}
             <button
               type="button"
               onClick={async () => {
                 if (!onRequestImprove) return;
+                const errors: string[] = [];
+                const requiredCats = ["completeness", "tone", "presentation", "verbosity", "other"];
+                for (const c of requiredCats) {
+                  if (!(evaluation as any)[c] || (evaluation as any)[c] <= 0) {
+                    errors.push(`Rate ${c} (1-5).`);
+                  }
+                }
+                if (!promptStructure || promptStructure.trim() === "") {
+                  errors.push('Select a prompt structure.');
+                }
+                if (evaluation.objective === undefined) {
+                  errors.push('Select YES or NO for Objective.');
+                } else if (evaluation.objective === false && !rewriteObjective.trim()) {
+                  errors.push('Rewrite Objective is required when Objective is NO.');
+                }
+
+                if (errors.length > 0) {
+                  setValidationErrors(errors);
+                  return;
+                }
+
+                setValidationErrors([]);
                 setImproving(true);
                 try {
-                  await onRequestImprove(evaluation);
+                  // send enriched payload including original prompt and response
+                  await onRequestImprove({
+                    ...evaluation,
+                    rewrittenObjective: evaluation.objective === false ? rewriteObjective : undefined,
+                    promptStructure,
+                    originalPrompt: generatedPrompt,
+                    aiResponse,
+                    taskObjective,
+                  });
                 } catch (e) {
                   console.error('reiterate error', e);
                 } finally {

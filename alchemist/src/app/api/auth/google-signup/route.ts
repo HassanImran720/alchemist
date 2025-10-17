@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import UserModel from "@/db/models/User";
 import dbConnect from "@/db/dbConnect";
-import jwt from "jsonwebtoken";
+import { signJwt } from "@/helpers/jwt";
 import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_ID);
@@ -28,7 +28,11 @@ console.log(token);
 
     // Create new user
     const newUser = await UserModel.create({ name, email, authMethod: "google" });
-    const jwtToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    const jwtToken = signJwt({ 
+      id: newUser._id, 
+      email: newUser.email, 
+      authMethod: newUser.authMethod 
+    });
 
     return NextResponse.json({ token: jwtToken, user: newUser });
   } catch (err: any) {

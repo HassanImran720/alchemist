@@ -1,149 +1,11 @@
-// import { NextResponse } from "next/server";
-// import { buildGuidedPrompt, callGenerateText } from "../../../../lib/aiClient";
-
-// type Body = {
-//   mode: "guided" | "flow";
-//   schema?: "sales" | "marketing" | "content";
-//   task?: string;
-//   fields?: Record<string, any>;
-//   contextData?: Record<string, any>;
-//   references?: string;
-//   insertReferences?: string;
-//   format?: string;
-//   toneData?: string[];
-//   promptStructure?: string;
-//   length?: string;
-//   model?: string;
-// };
-
-// export async function POST(req: Request) {
-//   try {
-//     const body: Body = await req.json();
-
-//     if (!body.mode) {
-//       return NextResponse.json({ error: "mode is required" }, { status: 400 });
-//     }
-
-//     if (body.mode === "flow") {
-//       // flow: returns the user's freeform input as-is
-//       const prompt = body.task || "";
-//       return NextResponse.json({ prompt });
-//     }
-
-//     // guided mode: build a structured prompt and ask AI to refine it
-//     const schema = body.schema || "content";
-//     const task = body.task || "";
-//     // prefer contextData.dynamicFields if present, otherwise use fields
-//     const fields = (body.contextData && body.contextData.dynamicFields) || body.fields || body.contextData || {};
-//     const insertRefs = body.insertReferences || body.references || "";
-//     const format = body.format || "";
-//     const tone = (body.toneData || []).join(", ");
-//     const promptStructure = body.promptStructure || "";
-//     const length = body.length || "";
-
-//     let rawPrompt = buildGuidedPrompt({
-//       schema,
-//       task,
-//       fields,
-//       references: insertRefs,
-//       format,
-//     });
-
-//     // append extra directives for tone, structure and length so the refined
-//     // prompt includes those constraints
-//     if (tone) rawPrompt += `\n\n<Tone> ${tone} </Tone>`;
-//     if (promptStructure) rawPrompt += `\n\n<structure> ${promptStructure} </structure>`;
-//     if (length) rawPrompt += `\n\n<length> ${length} </length>`;
-
-//     // call the AI SDK to refine/expand the prompt
-//     const refined = await callGenerateText({
-//       prompt: `Refine and return only the final optimized prompt for use with an LLM.\n\nInput Prompt:\n${rawPrompt}`,
-//       model: body.model,
-//       maxTokens: 800,
-//     });
-
-//     return NextResponse.json({ prompt: refined });
-//   } catch (err: any) {
-//     return NextResponse.json({ error: err.message || String(err) }, { status: 500 });
-//   }
-// }
-
-
-// import { NextResponse } from "next/server";
-// import { buildGuidedPrompt, callGenerateText } from "../../../../lib/aiClient";
-
-// type Body = {
-//   mode: "guided" | "flow";
-//   schema?: "sales" | "marketing" | "content";
-//   task?: string;
-//   fields?: Record<string, string>;
-//   contextData?: Record<string, any>;
-//   references?: string;
-//   insertReferences?: string;
-//   format?: string;
-//   toneData?: string[];
-//   promptStructure?: string;
-//   length?: string;
-//   model?: string;
-// };
-
-// export async function POST(req: Request) {
-//   try {
-//     const body: Body = await req.json();
-
-//     if (!body.mode) {
-//       return NextResponse.json({ error: "mode is required" }, { status: 400 });
-//     }
-
-//     if (body.mode === "flow") {
-//       // flow mode: no restrictions, returns the user's freeform input as-is
-//       const prompt = body.task || "";
-//       return NextResponse.json({ prompt });
-//     }
-    
-//     // guided mode: build a structured prompt with XML tags
-//     const schema = body.schema || "content";
-//     const task = body.task || "";
-//     // prefer contextData.dynamicFields if present, otherwise use fields
-//     const fields = (body.contextData && body.contextData.dynamicFields) || body.fields || body.contextData || {};
-//     const insertRefs = body.insertReferences || body.references || "";
-//     const format = body.format || "";
-//     const tone = (body.toneData || []).join(", ");
-//     const promptStructure = body.promptStructure || "";
-//     const length = body.length || "";
-
-//     // Build the structured prompt with XML tags
-//     let rawPrompt = buildGuidedPrompt({
-//       schema,
-//       task,
-//       fields,
-//       references: insertRefs,
-//       format,
-//       tone,
-//       promptStructure,
-//       length,
-//     });
-
-//     // call the AI SDK to refine/expand the prompt
-//     const refined = await callGenerateText({
-//       prompt: `Refine and return only the final optimized prompt for use with an LLM.\n\nInput Prompt:\n${rawPrompt}`,
-//       model: body.model,
-//       maxTokens: 800,
-//     });
-     
-//     return NextResponse.json({ prompt: refined });
-//   } catch (err: any) {
-//     return NextResponse.json({ error: err.message || String(err) }, { status: 500 });
-//   }
-// }
-
-
-import { NextResponse } from "next/server";
-import { buildGuidedPrompt, callGenerateText } from "../../../../lib/aiClient";
+import { NextRequest, NextResponse } from "next/server";
+import { buildGuidedPrompt, buildFlowModePrompt } from "../../../../lib/promptBuilder";
+import { callGenerateText } from "../../../../lib/aiClient";
+import { withAuth, AuthenticatedUser } from "../../../../lib/auth";
+import { buildFormatInstruction, getFormatTemplate } from "../../../../lib/formatTemplates";
 
 type Body = {
   mode: "guided" | "flow";
-  schema?: "sales" | "marketing" | "content";
   task?: string;
   fields?: Record<string, string>;
   contextData?: Record<string, any>;
@@ -154,13 +16,16 @@ type Body = {
   promptStructure?: string;
   length?: string;
   model?: string;
+  selectedCategory?: string; // For guided mode - the selected category from dropdown
+  includeEmojis?: boolean; // For emoji inclusion
 };
 
-export async function POST(req: Request) {
+async function generateHandler(req: NextRequest, user: AuthenticatedUser) {
   try {
     const body: Body = await req.json();
 
     console.log("🟢 Incoming Request Body:", JSON.stringify(body, null, 2));
+    console.log("👤 Authenticated User:", user.email);
 
     if (!body.mode) {
       console.error("❌ Error: mode is required");
@@ -169,14 +34,40 @@ export async function POST(req: Request) {
 
     // FLOW MODE
     if (body.mode === "flow") {
-      const prompt = body.task || "";
-      console.log("🌀 Flow Mode Prompt:", prompt);
-      return NextResponse.json({ prompt });
+      const task = body.task || "";
+      const format = body.format || "";
+      const tone = (body.toneData || []).join(", ");
+      const length = body.length || "";
+      const promptStructure = body.promptStructure || "aichemist-formula";
+      const includeEmojis = body.includeEmojis || false;
+
+      console.log("🌀 Flow Mode - Building Structured Prompt with:", {
+        task,
+        format,
+        tone,
+        length,
+        promptStructure,
+        includeEmojis
+      });
+
+      // Build structured prompt for flow mode
+      const structuredPrompt = buildFlowModePrompt({
+        task,
+        format,
+        tone,
+        length,
+        promptStructure,
+        includeEmojis,
+      });
+
+      console.log("📜 Flow Mode Structured Prompt Generated:\n", structuredPrompt);
+
+      // Return the structured prompt directly (no refinement needed as it's already structured)
+      return NextResponse.json({ prompt: structuredPrompt });
     }
 
-    // GUIDED MODE
-    const schema = body.schema || "content";
-    const task = body.task || "";
+  // GUIDED MODE
+  const task = body.task || "";
     const fields =
       (body.contextData && body.contextData.dynamicFields) ||
       body.fields ||
@@ -185,11 +76,12 @@ export async function POST(req: Request) {
     const insertRefs = body.insertReferences || body.references || "";
     const format = body.format || "";
     const tone = (body.toneData || []).join(", ");
-    const promptStructure = body.promptStructure || "";
+    const promptStructure = body.promptStructure || "aichemist-formula";
     const length = body.length || "";
+    const selectedCategory = body.selectedCategory || "";
+    const includeEmojis = body.includeEmojis || false;
 
-    console.log("🧩 Building Structured Prompt with:", {
-      schema,
+    console.log("🧩 Building Structured Guided Prompt with:", {
       task,
       fields,
       insertRefs,
@@ -197,10 +89,13 @@ export async function POST(req: Request) {
       tone,
       promptStructure,
       length,
+      selectedCategory,
+      includeEmojis,
     });
 
-    let rawPrompt = buildGuidedPrompt({
-      schema,
+    // Build structured prompt for guided mode
+    const structuredPrompt = buildGuidedPrompt({
+      selectedCategory,
       task,
       fields,
       references: insertRefs,
@@ -208,23 +103,18 @@ export async function POST(req: Request) {
       tone,
       promptStructure,
       length,
+      includeEmojis,
     });
 
-    console.log("📜 Raw Prompt Generated:\n", rawPrompt);
+    console.log("📜 Guided Mode Structured Prompt Generated:\n", structuredPrompt);
 
-    // Refine prompt using AI SDK
-    const refined = await callGenerateText({
-      prompt: `Refine and return only the final optimized prompt for use with an LLM.\n\nInput Prompt:\n${rawPrompt}`,
-      model: body.model,
-      maxTokens: 800,
-    });
-
-    console.log("✨ Refined Prompt Response from AI SDK:\n", refined);
-
-    // Success Response
-    return NextResponse.json({ prompt: refined });
+    // Return the structured prompt directly
+    return NextResponse.json({ prompt: structuredPrompt });
   } catch (err: any) {
     console.error("💥 Server Error:", err.message || err);
     return NextResponse.json({ error: err.message || String(err) }, { status: 500 });
   }
 }
+
+// Export the protected POST handler
+export const POST = withAuth(generateHandler);

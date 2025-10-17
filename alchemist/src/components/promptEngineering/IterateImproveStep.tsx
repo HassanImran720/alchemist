@@ -2,21 +2,20 @@
 import React, { useState } from "react";
 import { RefreshCw, Copy, BookOpen } from "lucide-react";
 
+import { usePromptEng } from "../../context/PromptEngContext";
+
 interface IterateImproveStepProps {
   evaluation: any;
   originalPrompt: string;
   onImprove: (improvedPrompt: string) => void;
-  promptStrucure: string;
-  setPromptStrucure: (value: string) => void;
 }
 
 const IterateImproveStep: React.FC<IterateImproveStepProps> = ({
   evaluation,
   originalPrompt,
   onImprove,
-  promptStrucure,
-  setPromptStrucure,
 }) => {
+  const { promptStructure, setPromptStructure } = usePromptEng();
   const [currentIteration, setCurrentIteration] = useState(1);
   const [charms] = useState(95);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -90,8 +89,8 @@ Pain Points: High acquisition cost, low conversion rates.
         </label>
         <select
           className="w-full px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm mb-4 focus:outline-gold"
-          value={promptStrucure || ""}
-          onChange={(e) => setPromptStrucure(e.target.value)}
+          value={promptStructure || ""}
+          onChange={(e) => setPromptStructure(e.target.value)}
         >
           <option value="aichemist-formula">AICHEMIST Formula</option>
           <option value="json">JSON</option>

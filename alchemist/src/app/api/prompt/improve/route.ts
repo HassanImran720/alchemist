@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { callGenerateText } from '@/lib/aiClient';
+import { withAuth, AuthenticatedUser } from '@/lib/auth';
 
-export async function POST(req: Request) {
+async function improveHandler(req: NextRequest, user: AuthenticatedUser) {
   try {
-    const body = await req.json();
-    const { originalPrompt, evaluation, references, format } = body || {};
+  const body = await req.json();
+  console.log("🟢 Improve Prompt Request Body:", body);
+  const { originalPrompt, evaluation, references, format, aiResponse, taskObjective, promptStructure } = body || {};
+
+    console.log("👤 Authenticated User:", user.email);
 
     if (!originalPrompt) {
       return NextResponse.json({ error: 'originalPrompt is required' }, { status: 400 });
@@ -58,9 +62,9 @@ export async function POST(req: Request) {
 
     const reiterationInstruction = buildReiteration(evaluation);
 
-    const systemPrompt = `You are a high-performance prompt engineer. Given an original prompt and evaluation notes, produce a short reiteration prompt that follows the structure: <Role>, <Objective>, <Method>, <Inputs>, <Completeness>, <Tone>, <Presentation>, <Verbosity>, <Other>, <References>, <Format>. Only include sections that require changes; for unchanged sections use "No Change". Keep each section to 1-2 sentences max and use concise, high-impact phrasing.`;
+  const systemPrompt = `You are a high-performance prompt engineer. Produce a reiteration prompt that EXACTLY follows the labeled structure below:\n\n<Role>\n<Objective>\n<Method>\n<Inputs>\n<Completeness>\n<Tone>\n<Presentation>\n<Verbosity>\n<Other>\n<References>\n<Format>\n\nRules:\n- Include only the 11 labeled sections above, in that order.\n- For sections that require no change, write the section heading then the words: No Change.\n- For Objective: if the evaluation indicates the objective failed, include a one-line labeled subsection 'REWRITE OBJECTIVE' with the new objective text.\n- Every section's content must be 1-2 sentences. Do NOT produce more than 2 sentences per section.\n- Do not include any extra commentary, explanation, or metadata. Output must be only the 11 labeled sections and their short content.`;
 
-    const userMessage = `Original Prompt:\n${originalPrompt}\n\nEvaluation Summary:\n${reiterationInstruction}\n\nReferences:\n${references || 'No References'}\n\nFormat:\n${format || 'No Format'}\n\nProduce the reiteration prompt now.`;
+  const userMessage = `Original Prompt:\n${originalPrompt}\n\nPrevious AI Response:\n${aiResponse || 'No previous response provided.'}\n\nTask Objective (user may have rewritten):\n${taskObjective || 'No objective provided.'}\n\nEvaluation Summary:\n${reiterationInstruction}\n\nPreferred Output Structure:\n${promptStructure || 'unspecified'}\n\nReferences:\n${references || 'No References'}\n\nFormat:\n${format || 'No Format'}\n\nImportant: follow the system prompt rules exactly. Pay special attention to the verbosity score and adjust length/detail accordingly. If Objective needs rewriting, include a 'REWRITE OBJECTIVE' line under <Objective> with the new text. Include any tags/headings from the original prompt into the appropriate sections if relevant. Produce the reiteration prompt now.`;
 
     const aiResult = await callGenerateText({ prompt: `${systemPrompt}\n\n${userMessage}`, model: 'gpt-4o-mini', maxTokens: 400 });
 
@@ -72,3 +76,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: err?.message || 'Server error' }, { status: 500 });
   }
 }
+
+// Export the protected POST handler
+export const POST = withAuth(improveHandler);

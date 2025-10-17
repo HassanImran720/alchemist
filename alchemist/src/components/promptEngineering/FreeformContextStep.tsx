@@ -1,5 +1,6 @@
 // import React from 'react';
 // import { ContextData } from './PromptEngSection';
+import { ContextData } from '../../context/PromptEngContext';
 
 // interface Props {
 //   contextData: ContextData;
@@ -32,7 +33,7 @@
 
 
 import React from 'react';
-import { ContextData } from './PromptEngSection';
+// Removed duplicate import, using the one from context
 
 interface Props {
   contextData: ContextData;

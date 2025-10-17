@@ -84,6 +84,8 @@
 "use client";
 import React, { useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
+import { getAvailableModels, isModelAvailable } from "../../lib/aiModels";
+import { usePromptEng } from "../../context/PromptEngContext";
 
 interface GenerateResponseProps {
   generatedPrompt: string;
@@ -95,9 +97,11 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
   generatedPrompt,
   onGenerateResponse,
 }) => {
-  const [selectedModel, setSelectedModel] = useState("chatgpt");
+  const { selectedModel, setSelectedModel } = usePromptEng();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
+
+  const availableModels = getAvailableModels();
 
   const handleGenerate = async () => {
     try {
@@ -106,6 +110,18 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
 
       if (!generatedPrompt || generatedPrompt.trim() === "") {
         setError("Please generate a prompt first before generating response");
+        setLoading(false);
+        return;
+      }
+
+      if (!selectedModel) {
+        setError("Please select a model to generate response");
+        setLoading(false);
+        return;
+      }
+
+      if (!isModelAvailable(selectedModel)) {
+        setError(`${selectedModel.charAt(0).toUpperCase() + selectedModel.slice(1)} is coming soon and not available yet. Please select ChatGPT for now.`);
         setLoading(false);
         return;
       }
@@ -143,19 +159,36 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
       {/* Select Model */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Model
+          Select Model <span className="text-red-500">*</span>
         </label>
         <select
           className="w-full px-3 py-2 border border-gold/30 rounded-md bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50"
           value={selectedModel}
           onChange={(e) => setSelectedModel(e.target.value)}
           disabled={loading}
+          required
         >
-          <option value="chatgpt">ChatGPT</option>
-          <option value="claude">Claude</option>
-          <option value="perplexity">Perplexity</option>
-          <option value="manual">Paste Manually</option>
+          <option value="">Choose a model...</option>
+          {availableModels.map((model) => (
+            <option key={model.id} value={model.id}>
+              {model.name} {model.available ? '' : '(Coming Soon)'}
+            </option>
+          ))}
+          {/* Show unavailable models with coming soon message */}
+          <option value="claude" disabled>
+            Claude (Anthropic) - Coming Soon
+          </option>
+          <option value="perplexity" disabled>
+            Perplexity AI - Coming Soon
+          </option>
         </select>
+        
+        {/* Show availability message */}
+        {selectedModel && !isModelAvailable(selectedModel) && (
+          <p className="mt-1 text-sm text-orange-600">
+            This model is coming soon and not available yet. Please select ChatGPT for now.
+          </p>
+        )}
       </div>
 
       {/* Generate Button - white loading style to match OutputDesign */}
@@ -164,7 +197,7 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
           loading ? "bg-white text-gold border border-gold/30" : "bg-gold text-white"
         }`}
         onClick={handleGenerate}
-        disabled={loading || !generatedPrompt}
+        disabled={loading || !generatedPrompt || !selectedModel || !isModelAvailable(selectedModel)}
       >
         {loading ? (
           <>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import UserModel from "@/db/models/User";
-import jwt from "jsonwebtoken";
+import { signJwt } from "@/helpers/jwt";
 import dbConnect from "@/db/dbConnect";
 
 export async function POST(req: NextRequest) {
@@ -50,7 +50,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Create JWT
-    const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    const token = signJwt({ 
+      id: existingUser._id, 
+      email: existingUser.email, 
+      authMethod: existingUser.authMethod 
+    });
 
     return NextResponse.json({ token, user: existingUser });
   } catch (err: any) {

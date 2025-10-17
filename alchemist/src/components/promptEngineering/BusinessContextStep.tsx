@@ -1,37 +1,10 @@
 import React, { useState } from "react";
-import { ContextData } from "./PromptEngSection";
+import { ContextData, usePromptEng } from "../../context/PromptEngContext";
 import { ChevronDown, ChevronUp, Triangle } from "lucide-react";
-import { optionFieldsConfigData } from "./GuidedModeForms";
+import { optionFieldsConfigData, FieldType, FieldConfig, OptionFieldsConfig } from "./GuidedModeForms";
 interface Props {
   contextData: ContextData;
   setContextData: React.Dispatch<React.SetStateAction<ContextData>>;
-}
-
-type FieldType =
-  | "text"
-  | "dropdown"
-  | "checkbox"
-  | "multiselect"
-  | "file"
-  | "date"
-  | "toggle"
-  | "link"
-  | "upload"
-  | "daterange"
-  | "number";
-
-interface FieldConfig {
-  label: string;
-  type: FieldType;
-  placeholder?: string;
-  options?: string[];
-}
-
-interface OptionFieldsConfig {
-  [key: string]: {
-    group: string;
-    fields: FieldConfig[];
-  }[];
 }
 
 const optionFieldsConfig: OptionFieldsConfig = optionFieldsConfigData;
@@ -40,7 +13,7 @@ const BusinessContextStep: React.FC<Props> = ({
   contextData,
   setContextData,
 }) => {
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const { selectedCategory, setSelectedCategory } = usePromptEng();
   const [openGroups, setOpenGroups] = useState<{ [key: string]: boolean }>({});
 
   const updateFieldValue = (label: string, value: any) => {
@@ -114,8 +87,8 @@ const BusinessContextStep: React.FC<Props> = ({
         </label>
         <div className="relative">
           <select
-            value={selectedOption}
-            onChange={(e) => setSelectedOption(e.target.value)}
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full appearance-none p-2 pr-8 border-[0.5px] border-gold/30 rounded-md bg-ivory"
           >
             <option value="">Choose an option...</option>
@@ -137,8 +110,8 @@ const BusinessContextStep: React.FC<Props> = ({
       </p>
 
       {/* Dynamic Groups */}
-      {selectedOption &&
-        optionFieldsConfig[selectedOption]?.map((group, idx) => (
+      {selectedCategory &&
+        optionFieldsConfig[selectedCategory]?.map((group, idx) => (
           <div key={idx} className="mb-2 pt-2">
             {/* Group Header */}
             <div className="border-[0.5px] border-gold/30 p-2 rounded-md">

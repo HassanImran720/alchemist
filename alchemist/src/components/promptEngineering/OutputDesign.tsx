@@ -132,14 +132,13 @@
 "use client";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { usePromptEng } from "../../context/PromptEngContext";
 
 interface Props {
   references: string;
   setReferences: (value: string) => void;
   outputFormat: string;
   setOutputFormat: (value: string) => void;
-  promptStrucure?: string;
-  setPromptStrucure?: (value: string) => void;
   length: string;
   setLength: (value: string) => void;
   onGenerate: () => Promise<void> | void;
@@ -150,14 +149,31 @@ const OutputDesign: React.FC<Props> = ({
   setReferences,
   outputFormat,
   setOutputFormat,
-  promptStrucure,
-  setPromptStrucure,
   length,
   setLength,
   onGenerate,
 }) => {
-  const [includeEmojis, setIncludeEmojis] = useState(false);
+  const {
+    includeEmojis,
+    setIncludeEmojis,
+    taskObjective,
+    selectedContext,
+    selectedCategory,
+    promptStructure,
+    setPromptStructure,
+  } = usePromptEng();
   const [loading, setLoading] = useState(false);
+
+  const validationErrors: string[] = [];
+  if (!taskObjective || taskObjective.trim() === "") {
+    validationErrors.push("Define Objective is required");
+  }
+  if (selectedContext === "guidedmode" && (!selectedCategory || selectedCategory.trim() === "")) {
+    validationErrors.push("Select Category is required for Guided Mode");
+  }
+  if (!outputFormat || outputFormat.trim() === "") {
+    validationErrors.push("Select Output Format is required");
+  }
 
   const handleGenerateClick = async () => {
     try {
@@ -192,15 +208,16 @@ const OutputDesign: React.FC<Props> = ({
               value={outputFormat}
               onChange={(e) => setOutputFormat(e.target.value)}
             >
-              <option value="email">Select an option</option>
+              <option value="">Select an option</option>
+              <option value="general">General Output</option>
               <option value="email">Email</option>
               <option value="blog">Blog Post</option>
               <option value="twitter-post">Twitter Post</option>
               <option value="script">Script</option>
               <option value="academic-essay">Academic Essay</option>
-              <option value="report">Social Media Post</option>
+              <option value="social-media-post">Social Media Post</option>
               <option value="presentation">Presentation</option>
-              <option value="social-media-post">Report</option>
+              <option value="report">Report</option>
               <option value="landing-page">Checklist/SOP</option>
               <option value="product-description">SEO Keywords</option>
             </select>
@@ -247,11 +264,10 @@ const OutputDesign: React.FC<Props> = ({
         </label>
         <select
           className="w-full px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm mb-4 focus:outline-gold"
-          value={promptStrucure || ""}
-          onChange={(e) =>
-            setPromptStrucure && setPromptStrucure(e.target.value)
-          }
+          value={promptStructure || ""}
+          onChange={(e) => setPromptStructure(e.target.value)}
         >
+          <option value="">Select structure</option>
           <option value="aichemist-formula">AICHEMIST Formula</option>
           <option value="json">JSON</option>
           <option value="yaml">YAML</option>
@@ -261,12 +277,21 @@ const OutputDesign: React.FC<Props> = ({
           <option value="markdown">Markdown</option>
         </select>
 
+        {/* Validation messages */}
+        {validationErrors.length > 0 && (
+          <div className="mb-3 text-sm text-red-600">
+            {(!taskObjective || taskObjective.trim() === "") && <div>• Define Objective is required</div>}
+            {selectedContext === "guidedmode" && (!selectedCategory || selectedCategory.trim() === "") && <div>• Select Category is required for Guided Mode</div>}
+            {(!outputFormat || outputFormat.trim() === "") && <div>• Select Output Format is required</div>}
+          </div>
+        )}
+
         <button
           onClick={handleGenerateClick}
-          disabled={loading}
+          disabled={loading || !taskObjective || (selectedContext === "guidedmode" && !selectedCategory) || !outputFormat}
           className={`w-full py-3 rounded-md text-sm font-medium transition ${
-            loading
-              ? "bg-white text-gold border border-gold/30"
+            loading || !taskObjective || (selectedContext === "guidedmode" && !selectedCategory) || !outputFormat
+              ? "bg-white text-gold border border-gold/30 cursor-not-allowed"
               : "bg-gold text-white hover:bg-yellow-600"
           }`}
         >
