@@ -145,7 +145,7 @@ const ViewResponse: React.FC<TestAIResponseStepProps> = ({ aiResponse, onOpenSav
       <div className="mb-2">
         <div
           ref={containerRef}
-          className="relative p-4 border border-gold/30 rounded-md bg-ivory text-black prose prose-sm sm:prose-base md:prose-lg max-w-none leading-relaxed overflow-auto max-h-[720px]"
+          className="relative p-4 border border-gold/30 rounded-md bg-ivory text-black prose prose-sm sm:prose-base md:prose-lg max-w-none leading-relaxed overflow-auto max-h-[720px] custom-scroll"
         >
           {/* Controls removed from top-right; moved to footer below */}
 

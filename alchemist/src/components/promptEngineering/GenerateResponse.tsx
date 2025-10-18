@@ -1,86 +1,3 @@
-// "use client";
-// import React, { useState } from "react";
-
-// interface GenerateResponseProps {
-//   generatedPrompt: string;
-//   onResponseGenerated: (response: string) => void;
-// }
-
-// const GenerateResponse: React.FC<GenerateResponseProps> = ({
-//   generatedPrompt,
-//   onResponseGenerated,
-// }) => {
-//   const [selectedModel, setSelectedModel] = useState("gpt-4o-mini");
-//   const [loading, setLoading] = useState(false);
-
-//   const handleGenerate = async () => {
-//     try {
-//       setLoading(true);
-//       const promptToSend = generatedPrompt;
-//       if (!promptToSend) {
-//         onResponseGenerated("");
-//         setLoading(false);
-//         return;
-//       }
-
-//       const res = await fetch("/api/prompt/respond", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ prompt: promptToSend, model: selectedModel, maxTokens: 800 }),
-//       });
-
-//       const data = await res.json();
-//       if (data.error) throw new Error(data.error);
-//       onResponseGenerated(data.text || "");
-//     } catch (err) {
-//       console.error("GenerateResponse error:", err);
-//       onResponseGenerated("");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="rounded-xl border border-gold/30 p-2 md:p-4 mb-4 ">
-//        <div className="flex items-center mb-2">
-//       <h2 className=" text-base sm:text-lg text-black mb-3 sm:mb-1"><strong >IX. Generate Response
-
-// </strong>
-//  </h2>
-//     </div>
-
-//       {/* Select Model */}
-//       <div className="mb-4">
-//         <label className="block text-sm font-medium text-gray mb-2">
-//           Select Model or Paste Manually
-//         </label>
-//         <select
-//           className="w-full px-3 py-2 border border-gold/30 rounded-md bg-gray-50 text-sm focus:outline-none"
-//           value={selectedModel}
-//           onChange={(e) => setSelectedModel(e.target.value)}
-//         >
-//           <option value="chatgpt">ChatGPT</option>
-//           <option value="claude">Claude</option>
-//           <option value="perplexity">Perplexity</option>
-//           <option value="manual">Paste Manually</option>
-//         </select>
-//       </div>
-
-//       {/* Generate Button */}
-//       <button
-//         className="w-full bg-gold text-white py-2 rounded-md text-sm font-medium hover:bg-yellow-600 transition"
-//         onClick={handleGenerate}
-//       >
-//         Generate Response
-//       </button>
-//     </div>
-//   );
-// };
-
-// export default GenerateResponse;
-
-
-
 "use client";
 import React, { useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -141,7 +58,7 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
   };
 
   return (
-    <div className="rounded-xl border border-gold/30 p-2 md:p-4 mb-4">
+  <div className="rounded-xl border border-gold/30 p-2 md:p-4 mb-4 custom-scroll">
       <div className="flex items-center mb-2">
         <h2 className="text-base sm:text-lg text-black mb-3 sm:mb-1">
           <strong>IX. Generate Response</strong>

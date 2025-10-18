@@ -50,7 +50,7 @@ const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
         </h2>
       </div>
 
-      <div className="bg-ivory border-[0.5px] border-gold/30 rounded-md p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap overflow-x-auto min-h-[200px] max-h-[400px] sm:max-h-[500px]">
+      <div className="bg-ivory border-[0.5px] border-gold/30 rounded-md p-4 mb-4 font-mono text-sm text-gray-800 whitespace-pre-wrap overflow-x-auto min-h-[200px] max-h-[400px] sm:max-h-[500px] custom-scroll">
         {externalPrompt ? externalPrompt : "No prompt generated yet."}
       </div>
 

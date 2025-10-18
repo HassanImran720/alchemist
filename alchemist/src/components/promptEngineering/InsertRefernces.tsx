@@ -268,7 +268,7 @@
 
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FileText, Upload, X, Book, BarChart2, Eye, Trash2, CheckCircle } from "lucide-react";
 
 interface UploadedFile {
@@ -296,6 +296,29 @@ const InsertReferences: React.FC<InsertReferencesProps> = ({
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<UploadedFile | null>(null);
   const [manualText, setManualText] = useState("");
+  const manualTextRef = useRef<HTMLTextAreaElement | null>(null);
+  const caretRef = useRef<{ start: number; end: number } | null>(null);
+
+  const handleManualChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    // Save caret positions so we can restore after state update
+    const start = e.target.selectionStart ?? value.length;
+    const end = e.target.selectionEnd ?? value.length;
+    caretRef.current = { start, end };
+    setManualText(value);
+
+    // Restore caret on next animation frame when DOM has updated
+    requestAnimationFrame(() => {
+      if (manualTextRef.current && caretRef.current) {
+        try {
+          manualTextRef.current.selectionStart = caretRef.current.start;
+          manualTextRef.current.selectionEnd = caretRef.current.end;
+        } catch (err) {
+          // ignore if browser blocks selection setting
+        }
+      }
+    });
+  };
 
   // Extract text from PDF using multiple methods  
   const extractTextFromPDF = async (file: File): Promise<string> => {
@@ -778,8 +801,10 @@ const InsertReferences: React.FC<InsertReferencesProps> = ({
             </div>
 
             <textarea
+              ref={manualTextRef}
+              dir="ltr"
               value={manualText}
-              onChange={(e) => setManualText(e.target.value)}
+              onChange={handleManualChange}
               placeholder="Type or paste your reference material here..."
               className="w-full h-32 sm:h-40 px-3 py-2 border border-gold/30 rounded-md bg-ivory text-sm sm:text-base focus:outline-gold"
               autoFocus
