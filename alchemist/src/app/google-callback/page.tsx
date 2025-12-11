@@ -6,7 +6,7 @@
 //   const router = useRouter();
 
 //   useEffect(() => {
-//     const params = new URLSearchParams(window.location.hash.substring(1)); 
+//     const params = new URLSearchParams(window.location.hash.substring(1));
 //     // Google implicit flow returns token in hash (#id_token=...)
 //     const token = params.get("id_token");
 //     const state = params.get("state");
@@ -43,10 +43,9 @@
 
 //     exchange();
 //   }, [router]);
-
+// console.log("dsas")
 //   return <p className="text-center mt-10">Completing Google auth...</p>;
 // }
-
 
 "use client";
 import { useEffect } from "react";
@@ -73,7 +72,9 @@ export default function GoogleCallbackPage() {
 
     const exchange = async () => {
       const endpoint =
-        mode === "signup" ? "/api/auth/google-signup" : "/api/auth/google-login";
+        mode === "signup"
+          ? "/api/auth/google-signup"
+          : "/api/auth/google-login";
 
       const res = await fetch(endpoint, {
         method: "POST",
