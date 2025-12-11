@@ -43,7 +43,6 @@
 
 //     exchange();
 //   }, [router]);
-// console.log("dsas")
 //   return <p className="text-center mt-10">Completing Google auth...</p>;
 // }
 
