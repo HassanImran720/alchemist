@@ -5,15 +5,23 @@ export interface IPromptLibrary extends Document<Types.ObjectId> {
   title: string;
   userId: Types.ObjectId;
   
-  // Prompt Content
-//   rawPrompt: string;
-//   refinedPrompt: string;
-  fullPromptContent: string; // Combined content as shown to user
+  // ✅ Iterations array - stores all prompt refinement cycles with complete data
+  iterations?: Array<{
+    iterationNumber: number;
+    prompt: string;
+    response: string;
+    evaluation: Record<string, any> | null;
+    aiModel: string;
+    promptStructure?: string;
+    timestamp: Date;
+  }>;
+  
+  // Best score from all iterations
+  bestScore?: number;
   
   // Generation Context
-  taskObjective: string;
-  mode: 'guided' | 'flow';
-  promptSchema?: string;
+  taskObjective?: string;
+  category?: string; // Category-based prompt generation
   
   // Context Data
   contextData?: Record<string, any>;
@@ -22,21 +30,12 @@ export interface IPromptLibrary extends Document<Types.ObjectId> {
   
   // Output Configuration
   outputFormat?: string;
-  promptStructure?: string;
   length?: string;
   toneData?: string[];
   
-  // AI Response (if generated)
-  aiResponse?: string;
-  // Evaluation data and aggregate score
-  evaluation?: Record<string, any>;
-  totalScore?: number;
-  
   // Metadata
-  aiModel?: string;
   project?: string;
   notes?: string;
-  score?: number;
   
   // Timestamps
   createdAt: Date;
@@ -66,33 +65,55 @@ const promptLibrarySchema = new Schema<IPromptLibrary>(
       index: true
     },
     
-    // Prompt Content
-    // rawPrompt: {
-    //   type: String,
-    //   default: ""
-    // },
-    // refinedPrompt: {
-    //   type: String,
-    //   required: true
-    // },
-    fullPromptContent: {
-      type: String,
-      required: true
+    // ✅ Iterations array - complete history of all refinement cycles
+    iterations: [{
+      iterationNumber: {
+        type: Number,
+        required: true
+      },
+      prompt: {
+        type: String,
+        required: true
+      },
+      response: {
+        type: String,
+        default: ""
+      },
+      evaluation: {
+        type: Schema.Types.Mixed,
+        default: null
+      },
+      aiModel: {
+        type: String,
+        default: "gpt-4o-mini"
+      },
+      promptStructure: {
+        type: String,
+        trim: true
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    
+    // Best score from all iterations (0-100)
+    bestScore: {
+      type: Number,
+      min: 0,
+      max: 100
     },
     
     // Generation Context
     taskObjective: {
       type: String,
-      required: true,
-      trim: true
+      required: false,
+      trim: true,
+      default: ""
     },
-    mode: {
+    category: {
       type: String,
-      enum: ['guided', 'flow'],
-      required: true
-    },
-    promptSchema: {
-      type: String,
+      required: false,
       trim: true
     },
     
@@ -115,10 +136,6 @@ const promptLibrarySchema = new Schema<IPromptLibrary>(
       type: String,
       trim: true
     },
-    promptStructure: {
-      type: String,
-      trim: true
-    },
     length: {
       type: String,
       trim: true
@@ -128,42 +145,16 @@ const promptLibrarySchema = new Schema<IPromptLibrary>(
       trim: true
     }],
     
-    // AI Response (if generated)
-    aiResponse: {
-      type: String
-    },
-    // Evaluation data saved from the Evaluate step
-    evaluation: {
-      type: Schema.Types.Mixed,
-      default: {}
-    },
-    // Aggregate numeric score from the evaluation (0-100)
-    totalScore: {
-      type: Number,
-      min: 0,
-      max: 100
-    },
-    
     // Metadata
-    aiModel: {
-      type: String,
-      trim: true,
-      default: 'gpt-4'
-    },
     project: {
       type: String,
       trim: true,
-      default: 'Default Project'
+      default: 'My Prompts'
     },
     notes: {
       type: String,
       trim: true,
       maxlength: 2000
-    },
-    score: {
-      type: Number,
-      min: 1,
-      max: 5
     },
     
     // Timestamps
@@ -229,11 +220,23 @@ promptLibrarySchema.pre('save', function(next) {
   if (!this.tags || this.tags.length === 0) {
     const autoTags = [];
     
-    if (this.mode) autoTags.push(this.mode);
+    if (this.category) autoTags.push(this.category.toLowerCase());
     if (this.outputFormat) autoTags.push(this.outputFormat.toLowerCase());
-    if (this.promptSchema) autoTags.push(this.promptSchema.toLowerCase());
     
     this.tags = autoTags;
+  }
+  
+  // Calculate best score from all iterations
+  if (this.iterations && this.iterations.length > 0) {
+    let maxScore = 0;
+    this.iterations.forEach(iteration => {
+      if (iteration.evaluation && iteration.evaluation.totalScore) {
+        maxScore = Math.max(maxScore, iteration.evaluation.totalScore);
+      }
+    });
+    if (maxScore > 0) {
+      this.bestScore = maxScore;
+    }
   }
   
   next();

@@ -1,20 +1,22 @@
 
 "use client";
 import React, { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Edit } from "lucide-react";
 import { usePromptEng } from "../../context/PromptEngContext";
 
 interface GeneratedPromptProps {
   externalPrompt?: string;
+  onOpenEditPrompt?: () => void; // ✅ NEW: callback to open parent's edit modal
 }
 
 const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
   externalPrompt = "",
+  onOpenEditPrompt,
 }) => {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
-  
+
   const { savePromptToLibrary, isSavingPrompt } = usePromptEng();
 
   const handleCopy = async () => {
@@ -33,12 +35,19 @@ const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
 
   const handleSaveToLibrary = async (title: string) => {
     try {
-      await savePromptToLibrary(title);
+      // Pass a default project name when called from this component
+      await savePromptToLibrary(title, 'My Prompts');
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
       console.error("Failed to save prompt:", err);
       throw err; // Re-throw to let modal handle the error
+    }
+  };
+
+  const handleEditClick = () => {
+    if (onOpenEditPrompt) {
+      onOpenEditPrompt(); // ✅ Use parent's handler
     }
   };
 
@@ -71,6 +80,15 @@ const GeneratedPromptStep: React.FC<GeneratedPromptProps> = ({
               Copy
             </>
           )}
+        </button>
+        
+        <button
+          onClick={handleEditClick}
+          disabled={!externalPrompt}
+          className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2 border-[0.5px] border-gold/30 rounded-md bg-ivory text-sm font-medium text-gray hover:bg-gold/10 transition"
+        >
+          <Edit className="w-4 h-4 mr-2" />
+          Edit Prompt
         </button>
       </div>
     </div>

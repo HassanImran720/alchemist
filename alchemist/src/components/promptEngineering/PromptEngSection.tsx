@@ -1,18 +1,19 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { usePromptEng } from "../../context/PromptEngContext";
 import DefineObjective from "./DefineObjective";
-import ChoosePath from "./ChoosePath";
+// import ChoosePath from "./ChoosePath"; // ❌ No longer needed
 import BusinessContextStep from "./BusinessContextStep";
-import FreeformContextStep from "./FreeformContextStep";
+// import FreeformContextStep from "./FreeformContextStep"; // ❌ No longer needed - now part of BusinessContextStep
 import OutputDesign from "./OutputDesign";
 import GeneratedPromptStep from "./GeneratedPromptStep";
 import EvaluateResponseStep from "./EvaluateResponseStep";
-import IterateImproveStep from "./IterateImproveStep";
+// import IterateImproveStep from "./IterateImproveStep"; // ❌ Commented - not currently used
 import SetToneStep from "./SetToneStep";
 import InsertReferences from "./InsertRefernces";
 import GenerateResponse from "./GenerateResponse";
+import IterationCycle from "./IterationCycle"; // ✅ NEW: For iteration cycles
 import {
   ChevronDown,
   ChevronUp,
@@ -25,6 +26,8 @@ import {
 } from "lucide-react";
 import ViewResponse from "./ViewResponse";
 import SavePromptModal from "./SavePromptModal";
+import EditResponseModal from "./EditResponseModal";
+import EditPromptModal from "./EditPromptModal";
 import { useState } from "react";
 
 export type ContextData = {
@@ -52,12 +55,14 @@ const PromptEngSection: React.FC = () => {
     // State from context
     taskObjective,
     setTaskObjective,
-    selectedContext,
-    setSelectedContext,
+    selectedCategory,
+    setSelectedCategory,
     contextData,
     setContextData,
     insertReferences,
     setInsertReferences,
+  referencesUsage,
+  setReferencesUsage,
     references,
     setReferences,
     outputFormat,
@@ -66,10 +71,13 @@ const PromptEngSection: React.FC = () => {
     setPromptStructure,
     length,
     setLength,
+    selectedModel,
+    setSelectedModel,
     showOutputForm,
     setShowOutputForm,
     generatedPrompt,
     aiResponse,
+    setAiResponse,
     evaluation,
     toneData,
     setToneData,
@@ -78,12 +86,23 @@ const PromptEngSection: React.FC = () => {
     showInstructions,
     setShowInstructions,
     
+    // ✅ NEW: Iteration management
+    iterations,
+    addIteration,
+    updateIterationResponse,
+    updateIterationPrompt,
+    updateIterationEvaluation,
+    toggleIterationCollapse,
+    currentIterationId,
+    
     // API functions from context
     generatePromptFromServer,
     generateResponseFromServer,
     improvePromptFromServer,
-  savePromptToLibrary,
-  isSavingPrompt,
+    savePromptToLibrary,
+    isSavingPrompt,
+    clearFormData,
+    loadPromptData,
     
     // Handler functions from context
     handlePromptGenerated,
@@ -99,29 +118,48 @@ const PromptEngSection: React.FC = () => {
 
   // Local UI state for Save modal (moved here so modal covers entire area and can blur background)
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingIterationId, setEditingIterationId] = useState<string | null>(null); // ✅ Track which iteration is being edited
+  const [showEditPromptModal, setShowEditPromptModal] = useState(false);
+  const [editingPromptIterationId, setEditingPromptIterationId] = useState<string | null>(null);
+  const [evaluateEnabled, setEvaluateEnabled] = useState(false);
+  const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
-  const renderContextStep = () => {
-    if (!selectedContext) return null; // 👈 by default nothing
-
-    switch (selectedContext) {
-      case "guidedmode":
-        return (
-          <BusinessContextStep
-            contextData={contextData}
-            setContextData={setContextData}
-          />
-        );
-      case "flowmode":
-        return (
-          <FreeformContextStep
-            contextData={contextData}
-            setContextData={setContextData}
-          />
-        );
-      default:
-        return null;
+  // Check for promptToEdit in localStorage on mount (from library edit action)
+  useEffect(() => {
+    const promptToEdit = localStorage.getItem('promptToEdit');
+    if (promptToEdit) {
+      try {
+        const promptData = JSON.parse(promptToEdit);
+        loadPromptData(promptData);
+        // Clear the flag after loading
+        localStorage.removeItem('promptToEdit');
+      } catch (error) {
+        console.error("Error loading prompt to edit:", error);
+      }
     }
-  };
+  }, []); // Empty dependency array - only run once on mount
+
+  // Monitor iterations state changes
+  useEffect(() => {
+    const iterationsArray = Array.isArray(iterations) ? iterations : [];
+    // Iterations state updated: length = iterationsArray.length
+      if (iterationsArray.length > 0) {
+        // Iterations exist
+      // Iterations loaded
+    } else {
+      // Iterations array is EMPTY - UI will not render
+    }
+  }, [iterations]);
+
+  // Derived flag: allow rendering advanced steps/iterations if we already have data
+  const canRenderAdvanced = !!selectedCategory || (Array.isArray(iterations) && iterations.length > 0) || !!generatedPrompt;
+  // Quick debug for render gating
+  if (typeof window !== 'undefined') {
+    // Render flags: selectedCategory, showOutputForm, iterationsCount, generatedPromptExists, canRenderAdvanced
+  }
+
+  // ❌ No longer need renderContextStep - BusinessContextStep handles all categories including General
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -148,7 +186,7 @@ const PromptEngSection: React.FC = () => {
           <div className="w-full max-w-2xl mx-auto mb-6">
             <button
               onClick={() => setShowInstructions(!showInstructions)}
-              className="w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-gray border border-gold/30 font-medium  hover:bg-gold/30 transition"
+              className="w-full flex items-center justify-center space-x-2 px-6 py-3 rounded-lg text-gray border border-gold/30 font-medium hover:bg-gold/30 transition"
             >
               <span>View Step-by-Step Instructions</span>
               {showInstructions ? (
@@ -202,21 +240,35 @@ const PromptEngSection: React.FC = () => {
       </div>
 
   {/* Steps Section */}
-  <div className={`max-w-4xl mx-auto px-4 py-8 ${showSaveModal ? 'filter blur-sm pointer-events-none select-none' : ''}`}>
+  <div className={`max-w-4xl mx-auto px-4 py-8 ${showSaveModal || showEditModal || showClearConfirmModal ? 'filter blur-sm pointer-events-none select-none' : ''}`}>
+        {/* Clear Form Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setShowClearConfirmModal(true)}
+            className="text-sm px-3 py-1.5 rounded-md text-gray border border-gold/20 hover:border-gold/40 hover:bg-gold/5 transition-all duration-200 flex items-center gap-1.5"
+            title="Clear all form data"
+          >
+            <RefreshCcw size={14} />
+            <span>Clear Form</span>
+          </button>
+        </div>
+        
         <DefineObjective
           taskObjective={taskObjective}
           setTaskObjective={setTaskObjective}
         />
-        <ChoosePath
-          selectedContext={selectedContext}
-          setSelectedContext={setSelectedContext}
+        
+        {/* ❌ Removed ChoosePath - No longer needed */}
+        {/* <ChoosePath selectedContext={selectedContext} setSelectedContext={setSelectedContext} /> */}
+
+        {/* ✅ BusinessContextStep now handles all categories including General */}
+        <BusinessContextStep
+          contextData={contextData}
+          setContextData={setContextData}
         />
 
-        {/* Context-based components render only when user selects something */}
-        {renderContextStep()}
-
-        {/* Neeche ka sab bhi sirf tab dikhe jab context select hua ho */}
-        {selectedContext && (
+        {/* ✅ Show rest of form when a category is selected OR we already have iterations/prompt (e.g., editing) */}
+        {canRenderAdvanced && (
           <>
             <SetToneStep toneData={toneData} setToneData={setToneData} />
 
@@ -246,89 +298,72 @@ const PromptEngSection: React.FC = () => {
               }}
             />
 
-            {showOutputForm && (
+            {(showOutputForm || (Array.isArray(iterations) && iterations.length > 0)) && (
               <>
-                {/* <GeneratedPromptStep
-                  taskDescription={taskObjective}
-                  selectedContext={selectedContext}
-                  contextData={contextData}
-                  references={references}
-                  outputFormat={outputFormat}
-                  onPromptGenerated={handlePromptGenerated}
-                /> */}
-{showOutputForm && (
-        <GeneratedPromptStep
-          externalPrompt={generatedPrompt} // ✅ only show backend prompt
-        />
-      )}
-                {/* yaha per ye compoennt rakhan ha resposne genrated ka */}
-                <GenerateResponse
-                  generatedPrompt={generatedPrompt}
-                  onGenerateResponse={async (prompt?: string) => {
-                    const text = await generateResponseFromServer(prompt);
-                    if (text) {
-                      setShowTestResponse(true);
+                {/* ✅ Render ALL iterations including the initial one */}
+                <div className="space-y-4">
+                  {(() => {
+                    const iterationsArray = Array.isArray(iterations) ? iterations : [];
+                    // Rendering iterations - Total count: iterationsArray.length
+                    
+                    if (iterationsArray.length === 0) {
+                      return (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                          <p className="text-yellow-700">No iterations found. Please generate a prompt first.</p>
+                        </div>
+                      );
                     }
-                    return text;
-                  }}
-                />
-
-                {showTestResponse && (
-                  <>
-                    {/* Test + Evaluate Section */}
-                    <div className="flex flex-col lg:flex-row w-full space-x-0 lg:space-x-3  mt-6">
-                      <div className="w-full lg:w-1/2 h-full flex">
-                        <div className={`flex-1 h-full ${showSaveModal ? 'filter blur-sm pointer-events-none select-none' : ''}`}>
-                          <ViewResponse
-                            aiResponse={aiResponse}
-                            onOpenSaveModal={() => setShowSaveModal(true)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="w-full lg:w-1/2 h-full flex">
-                        <div className="flex-1 h-full">
-                          <EvaluateResponseStep onRequestImprove={improvePromptFromServer} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Iterate + Improve Section */}
-                    {/* <div className="">
-                      <IterateImproveStep
-                        evaluation={
-                          evaluation || {
-                            objective: true,
-                            inputs: {
-                              audience: "General audience",
-                              contentGoal: "Inform",
-                              coreMessage: "Sample core message",
-                              audienceMotivation: "Learn something new",
-                            },
-                            completeness: 3,
-                            tone: 4,
-                            presentation: 5,
-                          }
-                        }
-                        originalPrompt={generatedPrompt || "Sample prompt"}
-                        onImprove={handleImprove}
-                
-                      />
-                    </div> */}
-                  </>
-                )}
+                    
+                    return iterationsArray.map((iteration, index) => {
+                      // Rendering iteration: index + 1, id: iteration.id
+                      return (
+                        <IterationCycle
+                          key={iteration.id}
+                          iterationNumber={index + 1}
+                          iterationId={iteration.id}
+                          prompt={iteration.prompt}
+                          response={iteration.response}
+                          evaluation={iteration.evaluation}
+                          isCollapsed={iteration.isCollapsed}
+                          onToggleCollapse={() => toggleIterationCollapse(iteration.id)}
+                          onGenerateResponse={async (prompt) => {
+                            const text = await generateResponseFromServer(prompt || iteration.prompt, iteration.id);
+                            return text;
+                          }}
+                          onRequestImprove={async (evalData) => {
+                            // Update evaluation for this iteration
+                            updateIterationEvaluation(iteration.id, evalData);
+                            // Create next iteration
+                            const improvedPrompt = await improvePromptFromServer(evalData, iteration.id);
+                            return improvedPrompt;
+                          }}
+                          onOpenSaveModal={() => setShowSaveModal(true)}
+                          onOpenEditResponse={() => {
+                            setEditingIterationId(iteration.id);
+                            setShowEditModal(true);
+                          }}
+                          onOpenEditPrompt={() => {
+                            setEditingPromptIterationId(iteration.id);
+                            setShowEditPromptModal(true);
+                          }}
+                        />
+                      );
+                    });
+                  })()}
+                </div>
               </>
             )}
-          </>
-        )}
+            </>
+          )}
       </div>
       {/* Global Save Prompt Modal rendered at section level so overlay can blur the whole section */}
       <SavePromptModal
         isOpen={showSaveModal}
         onClose={() => setShowSaveModal(false)}
-        onSave={async (title: string) => {
+        onSave={async (title: string, projectName: string) => {
           try {
-            await savePromptToLibrary(title);
+            await savePromptToLibrary(title, projectName);
+            clearFormData(); // Clear form after successful save
             setShowSaveModal(false);
           } catch (err) {
             console.error('Save from modal failed', err);
@@ -338,6 +373,84 @@ const PromptEngSection: React.FC = () => {
         }}
         isLoading={isSavingPrompt}
       />
+
+      {/* Global Edit Response Modal rendered at section level for center positioning */}
+      <EditResponseModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingIterationId(null);
+        }}
+        aiResponse={editingIterationId ? (iterations.find(i => i.id === editingIterationId)?.response || '') : ''}
+        onSave={(editedContent) => {
+          if (editingIterationId) {
+            updateIterationResponse(editingIterationId, editedContent);
+          }
+          setShowEditModal(false);
+          setEditingIterationId(null);
+        }}
+      />
+
+      {/* Global Edit Prompt Modal rendered at section level for center positioning */}
+      <EditPromptModal
+        isOpen={showEditPromptModal}
+        onClose={() => {
+          setShowEditPromptModal(false);
+          setEditingPromptIterationId(null);
+        }}
+        prompt={editingPromptIterationId ? (iterations.find(i => i.id === editingPromptIterationId)?.prompt || '') : ''}
+        onSave={(editedPrompt) => {
+          if (editingPromptIterationId) {
+            updateIterationPrompt(editingPromptIterationId, editedPrompt);
+          }
+          setShowEditPromptModal(false);
+          setEditingPromptIterationId(null);
+        }}
+      />
+
+      {/* Clear Form Confirmation Modal */}
+      {showClearConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full shadow-xl">
+            <div className="px-6 py-4 border-b border-gold/20">
+              <h2 className="text-xl font-bold text-black">Clear Form Data</h2>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-gray mb-6">
+                You have unsaved work. Would you like to save your prompt to the library before clearing the form?
+              </p>
+              
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => {
+                    setShowClearConfirmModal(false);
+                    setShowSaveModal(true);
+                  }}
+                  className="w-full bg-gold text-white px-6 py-3 rounded-md hover:bg-gold/90 transition-colors font-medium"
+                >
+                  Save to Library
+                </button>
+                <button 
+                  onClick={() => {
+                    clearFormData();
+                    setShowClearConfirmModal(false);
+                  }}
+                  className="w-full bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors font-medium"
+                >
+                  Discard & Clear Form
+                </button>
+                <button 
+                  onClick={() => setShowClearConfirmModal(false)}
+                  className="w-full bg-gray/10 text-gray px-6 py-3 rounded-md hover:bg-gray/20 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

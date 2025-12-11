@@ -39,7 +39,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (data.token) {
         localStorage.setItem("token", data.token);
         setUser(data.user);
-        router.push("/lab");
+        
+        // Check for redirect parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirect = urlParams.get('redirect');
+        
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push("/lab");
+        }
       } else {
         setError(data.error || "Login failed");
       }

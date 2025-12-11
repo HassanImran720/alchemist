@@ -5,23 +5,26 @@ import PromptLibraryModel from "../../../../db/models/PromptLibrary";
 
 type SavePromptBody = {
   title: string;
-//   rawPrompt: string;
-//   refinedPrompt: string;
-  fullPromptContent: string;
-  taskObjective: string;
-  mode: 'guided' | 'flow';
-  promptSchema?: string;
+  
+  // ✅ Iterations data - each iteration has its own complete data
+  iterations?: Array<{
+    iterationNumber: number;
+    prompt: string;
+    response: string;
+    evaluation: Record<string, any> | null;
+    aiModel: string;
+    promptStructure?: string;
+    timestamp: Date;
+  }>;
+  
+  taskObjective?: string;
+  category?: string;
   contextData?: Record<string, any>;
   insertReferences?: string;
   references?: string;
   outputFormat?: string;
-  promptStructure?: string;
   length?: string;
   toneData?: string[];
-  aiResponse?: string;
-  evaluation?: Record<string, any>;
-  totalScore?: number;
-  aiModel?: string;
   project?: string;
   notes?: string;
   tags?: string[];
@@ -44,27 +47,6 @@ async function savePromptHandler(req: NextRequest, user: AuthenticatedUser) {
       );
     }
 
-    if (!body.fullPromptContent?.trim()) {
-      return NextResponse.json(
-        { error: "Prompt content is required" }, 
-        { status: 400 }
-      );
-    }
-
-    if (!body.taskObjective?.trim()) {
-      return NextResponse.json(
-        { error: "Task objective is required" }, 
-        { status: 400 }
-      );
-    }
-
-    if (!body.mode || !['guided', 'flow'].includes(body.mode)) {
-      return NextResponse.json(
-        { error: "Valid mode (guided/flow) is required" }, 
-        { status: 400 }
-      );
-    }
-
     // Check if a prompt with the same title already exists for this user
     const existingPrompt = await PromptLibraryModel.findOne({
       userId: user.id,
@@ -78,42 +60,63 @@ async function savePromptHandler(req: NextRequest, user: AuthenticatedUser) {
       );
     }
 
+    // Calculate best score from all iterations
+    let bestScore = 0;
+    if (body.iterations && body.iterations.length > 0) {
+      body.iterations.forEach(iteration => {
+        if (iteration.evaluation && iteration.evaluation.totalScore) {
+          bestScore = Math.max(bestScore, iteration.evaluation.totalScore);
+        }
+      });
+    }
+
     // Create new prompt library entry
     const promptLibraryData = {
       title: body.title.trim(),
       userId: user.id,
-    //   rawPrompt: body.rawPrompt || "",
-    //   refinedPrompt: body.refinedPrompt || "",
-      fullPromptContent: body.fullPromptContent,
-      taskObjective: body.taskObjective,
-      mode: body.mode,
-      promptSchema: body.promptSchema || "",
+      
+      // ✅ Save all iterations with complete data
+      iterations: body.iterations || [],
+      bestScore: bestScore > 0 ? bestScore : undefined,
+      
+      taskObjective: body.taskObjective || "",
+      category: body.category || "",
       contextData: body.contextData || {},
       insertReferences: body.insertReferences || "",
       references: body.references || "",
       outputFormat: body.outputFormat || "",
-      promptStructure: body.promptStructure || "",
       length: body.length || "",
       toneData: body.toneData || [],
-      aiResponse: body.aiResponse || "",
-  evaluation: body.evaluation || {},
-  totalScore: typeof body.totalScore === 'number' ? body.totalScore : undefined,
-      aiModel: body.aiModel || "gpt-4",
-      project: body.project || "Default Project",
+      project: body.project || "My Prompts",
       notes: body.notes || "",
       tags: body.tags || [],
       usageCount: 0
     };
 
+    console.log("💾 Saving to database with", body.iterations?.length || 0, "iterations");
+    console.log("📊 Best Score:", bestScore);
+    console.log("📊 Project:", promptLibraryData.project);
+
     const savedPrompt = await PromptLibraryModel.create(promptLibraryData);
 
     console.log("✅ Prompt saved successfully:", savedPrompt._id);
+    console.log("📊 Saved prompt details:", {
+      id: savedPrompt._id,
+      title: savedPrompt.title,
+      userId: savedPrompt.userId,
+      project: savedPrompt.project,
+      category: savedPrompt.category,
+      iterationsCount: savedPrompt.iterations?.length || 0,
+      bestScore: savedPrompt.bestScore,
+      createdAt: savedPrompt.createdAt
+    });
 
     return NextResponse.json({
       success: true,
       message: "Prompt saved to library successfully",
       promptId: savedPrompt._id,
-      title: savedPrompt.title
+      title: savedPrompt.title,
+      project: savedPrompt.project
     });
 
   } catch (err: any) {

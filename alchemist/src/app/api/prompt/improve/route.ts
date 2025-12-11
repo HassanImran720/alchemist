@@ -1,79 +1,215 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { callGenerateText } from '@/lib/aiClient';
-import { withAuth, AuthenticatedUser } from '@/lib/auth';
+﻿import { NextRequest, NextResponse } from "next/server";
+import { callGenerateText } from "@/lib/aiClient";
+import { withAuth, AuthenticatedUser } from "@/lib/auth";
 
 async function improveHandler(req: NextRequest, user: AuthenticatedUser) {
   try {
-  const body = await req.json();
-  console.log("🟢 Improve Prompt Request Body:", body);
-  const { originalPrompt, evaluation, references, format, aiResponse, taskObjective, promptStructure } = body || {};
-
-    console.log("👤 Authenticated User:", user.email);
+    const body = await req.json();
+    const {
+      originalPrompt,
+      evaluation,
+      references,
+      format,
+      aiResponse,
+      taskObjective,
+      promptStructure,
+    } = body || {};
 
     if (!originalPrompt) {
-      return NextResponse.json({ error: 'originalPrompt is required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "originalPrompt is required" },
+        { status: 400 }
+      );
     }
 
-    // Build a concise reiteration instruction using the evaluation object
-    // The prompt we send to the AI should follow the "Reiterate Section Template" the user provided.
+    // Note: promptStructure is accepted from the frontend but specific format specs
+    // are no longer used server-side. Keep the original prompt and evaluation payloads.
+
+    // Build reiteration instruction following the new formula
     const buildReiteration = (evaluationObj: any) => {
       const sections: string[] = [];
+      const frontendSections: string[] = []; // ✅ User-facing sections only
 
-      // Objective
-      if (evaluationObj.objective === false) {
-        sections.push(`<Objective>: REWRITE OBJECTIVE — ${evaluationObj.rewrittenObjective || 'Please provide a new objective.'}`);
-      } else {
-        sections.push(`<Objective>: No Change`);
-      }
+      const correctInputs: string[] = [];
+      const inputIssues: Array<{
+        category: string;
+        description: string;
+        problematicText?: string;
+      }> = [];
+      const additionalIssuesList: Array<{
+        description: string;
+        problematicText?: string;
+      }> = [];
 
-      // Inputs
-      const inputLines: string[] = [];
+      // Categorize inputs by status
       for (const [key, val] of Object.entries(evaluationObj.inputs || {})) {
         const status = (val as any).status;
         const issues = (val as any).issues || [];
-        if (status === 'No Issues') {
-          inputLines.push(`${key}: No Change`);
-        } else if (status === 'Minor Issues') {
-          inputLines.push(`${key}: Minor — ${issues.join('; ') || 'Minor tweaks required'}`);
-        } else {
-          inputLines.push(`${key}: Major — ${issues.join('; ') || 'Major revision required'}`);
+
+        if (status === "No Issues") {
+          correctInputs.push(key);
+        } else if (status === "Has Issues") {
+          // Each issue now has description and optional problematicText
+          issues.forEach((issue: any) => {
+            inputIssues.push({
+              category: key,
+              description: issue.description,
+              problematicText: issue.problematicText,
+            });
+          });
         }
       }
-      sections.push(`<Inputs>: ${inputLines.join(' | ')}`);
 
-      // Categories
-      const categories = ['completeness','tone','presentation','verbosity','other'];
-      const catLines: string[] = [];
-      for (const c of categories) {
-        const score = evaluationObj[c] ?? 0;
-        const issues = (evaluationObj.categoryIssues && evaluationObj.categoryIssues[c]) || [];
-        if (score >= 5) {
-          catLines.push(`${c}: No Change`);
-        } else if (score >= 3) {
-          catLines.push(`${c}: Minor — ${issues.join('; ') || 'Minor refinement'}`);
-        } else {
-          catLines.push(`${c}: Major — ${issues.join('; ') || 'Major revision'}`);
-        }
+      // Collect additional issues separately
+      if (
+        evaluationObj.additionalIssues &&
+        evaluationObj.additionalIssues.length > 0
+      ) {
+        evaluationObj.additionalIssues.forEach((issue: any) => {
+          additionalIssuesList.push({
+            description: issue.description,
+            problematicText: issue.problematicText,
+          });
+        });
       }
-      sections.push(`<Categories>: ${catLines.join(' | ')}`);
 
-      return sections.join('\n');
+      // Build backend instruction (for AI processing)
+      if (correctInputs.length > 0) {
+        sections.push(
+          `This prompt did a fantastic job adhering to the following guidelines:\n${correctInputs.join(
+            ", "
+          )}\n\nPlease maintain this level of alignment. Focus your changes only on the items described below.`
+        );
+      }
+
+      // Format input issues (for both frontend and backend) — use softer wording
+      if (inputIssues.length > 0) {
+        const issueLines = inputIssues
+          .map((item, index) => {
+            let line = `${index + 1}. ${item.description}`;
+            if (item.problematicText && item.problematicText.trim()) {
+              line += `\n   Problematic Text (please avoid or reduce, for example): "${item.problematicText}"`;
+            }
+            return line;
+          })
+          .join("\n\n"); // ✅ Add double line breaks for readability
+
+        const issueSection = `${issueLines}`;
+        sections.push(issueSection);
+        // Add a short user-facing preface before Input Issues for frontend clarity
+        frontendSections.push(`Please address the issues highlighted below:\n`);
+        frontendSections.push(issueSection); // ✅ Add to frontend
+      }
+
+      // Format additional issues (for both frontend and backend)
+      if (additionalIssuesList.length > 0) {
+        const additionalLines = additionalIssuesList
+          .map((item, index) => {
+            let line = `${index + 1}. ${item.description}`;
+            if (item.problematicText && item.problematicText.trim()) {
+              line += `\n   Problematic Text: "${item.problematicText}"`;
+            }
+            return line;
+          })
+          .join("\n\n"); // ✅ Add double line breaks for readability
+
+        const additionalSection = `${additionalLines}`;
+        sections.push(additionalSection);
+        // Add a short user-facing preface before Additional Issues
+        frontendSections.push(
+          `\nPlease address the following additional issues:\n`
+        );
+        frontendSections.push(additionalSection); // ✅ Add to frontend
+      }
+
+      // Add "What I Love" section (for both frontend and backend)
+      if (evaluationObj.whatILove && evaluationObj.whatILove.length > 0) {
+        const lovedItems = evaluationObj.whatILove
+          .map((text: string, index: number) => `${index + 1}. ${text}`)
+          .join("\n\n"); // ✅ Add double line breaks for readability
+
+        const loveSection = `${lovedItems}`;
+        sections.push(
+          `${loveSection}\n\nPlease maintain these elements verbatim in the reiteration.`
+        );
+        // Add a short user-facing preface before the What I Love section
+        frontendSections.push(
+          `\nI loved the following elements from the initial response; please maintain the following text verbatim:\n`
+        );
+        frontendSections.push(loveSection); // ✅ Add to frontend
+      }
+
+      return {
+        fullInstruction: sections.join("\n\n"), // For AI backend
+        frontendDisplay: frontendSections.join("\n"), // ✅ For user frontend with single line breaks
+      };
     };
 
-    const reiterationInstruction = buildReiteration(evaluation);
+    const reiterationData = buildReiteration(evaluation);
 
-  const systemPrompt = `You are a high-performance prompt engineer. Produce a reiteration prompt that EXACTLY follows the labeled structure below:\n\n<Role>\n<Objective>\n<Method>\n<Inputs>\n<Completeness>\n<Tone>\n<Presentation>\n<Verbosity>\n<Other>\n<References>\n<Format>\n\nRules:\n- Include only the 11 labeled sections above, in that order.\n- For sections that require no change, write the section heading then the words: No Change.\n- For Objective: if the evaluation indicates the objective failed, include a one-line labeled subsection 'REWRITE OBJECTIVE' with the new objective text.\n- Every section's content must be 1-2 sentences. Do NOT produce more than 2 sentences per section.\n- Do not include any extra commentary, explanation, or metadata. Output must be only the 11 labeled sections and their short content.`;
+    const systemPrompt = `You are an expert prompt engineer providing iterative refinement feedback.
 
-  const userMessage = `Original Prompt:\n${originalPrompt}\n\nPrevious AI Response:\n${aiResponse || 'No previous response provided.'}\n\nTask Objective (user may have rewritten):\n${taskObjective || 'No objective provided.'}\n\nEvaluation Summary:\n${reiterationInstruction}\n\nPreferred Output Structure:\n${promptStructure || 'unspecified'}\n\nReferences:\n${references || 'No References'}\n\nFormat:\n${format || 'No Format'}\n\nImportant: follow the system prompt rules exactly. Pay special attention to the verbosity score and adjust length/detail accordingly. If Objective needs rewriting, include a 'REWRITE OBJECTIVE' line under <Objective> with the new text. Include any tags/headings from the original prompt into the appropriate sections if relevant. Produce the reiteration prompt now.`;
+CRITICAL INSTRUCTIONS:
+1. This is a REITERATION response, NOT a full prompt regeneration
+2. DO NOT output a complete prompt with Role, Method, References, Context, Tone, Format sections
+3. Output ONLY specific refinements and corrections based on the feedback provided
+4. Focus exclusively on addressing the issues mentioned in the evaluation
+5. Keep your response concise and targeted - only what needs to change
 
-    const aiResult = await callGenerateText({ prompt: `${systemPrompt}\n\n${userMessage}`, model: 'gpt-4o-mini', maxTokens: 400 });
+WHAT TO OUTPUT:
+- Specific improvements for sections with Minor Issues
+- Complete rewrites for sections with Major Issues
+- Targeted refinements addressing the exact feedback points
+- Plain text corrections without full structural sections
 
-    const improved = aiResult?.trim?.() || '';
-    console.log('Improved Prompt:', improved);
-    return NextResponse.json({ prompt: improved });
+WHAT NOT TO OUTPUT:
+- Full prompt structure with all sections (Role, Objective, Method, Context, Tone, References, Format)
+- Sections that had "No Issues" (these are already perfect)
+- Meta-commentary or explanations
+- Markdown code fences
+- Any content generated FROM the prompt
+
+YOUR RESPONSE FORMAT:
+Provide only the corrected/improved parts that address the specific issues. For example:
+- If Context has minor issues, provide the improved context details only
+- If Objective has major issues, provide the rewritten objective only
+- Do not include sections that are already working well`;
+
+    const userMessage = `PREVIOUS AI RESPONSE (for context):
+${aiResponse || "Not available"}
+
+REITERATION FEEDBACK:
+${reiterationData.fullInstruction}
+
+TASK OBJECTIVE:
+${taskObjective || "Not specified"}
+
+---
+
+YOUR TASK:
+Based on the reiteration feedback above, provide ONLY the specific improvements needed. Do not regenerate the entire prompt. Focus exclusively on fixing the issues mentioned.`;
+
+    const aiResult = await callGenerateText({
+      prompt: `${systemPrompt}\n\n${userMessage}`,
+      model: "gpt-4o-mini",
+      maxTokens: 800,
+    });
+
+    const improved = aiResult?.trim?.() || "";
+
+    // Return the frontend display for user and full instruction for backend
+    return NextResponse.json({
+      prompt: reiterationData.frontendDisplay, // ✅ Show only user-facing sections on frontend
+      aiGeneratedFixes: improved, // AI's specific fixes
+      basePrompt: aiResponse || originalPrompt,
+      isReiteration: true,
+    });
   } catch (err: any) {
-    console.error('improve route error', err);
-    return NextResponse.json({ error: err?.message || 'Server error' }, { status: 500 });
+    console.error("improve route error", err);
+    return NextResponse.json(
+      { error: err?.message || "Server error" },
+      { status: 500 }
+    );
   }
 }
 

@@ -12,10 +12,45 @@ export interface IUser extends Document<Types.ObjectId> {
     authMethod: 'self' | 'google' | 'github';
     profileurl: string;
     emailVerified: boolean;
+    projects: string[];
     passwordResetToken?: string;
     passwordResetTokenExpires?: Date;
     lastChangedPassword: Date;
     verificationToken?: string;
+    // Profile Identity fields
+    identity?: {
+        role?: string;
+        goals?: string;
+        values?: string;
+        skills?: string;
+        customFields?: { [key: string]: string };
+    };
+    // Profile Preferences fields
+    preferences?: {
+        preferredOutput?: string;
+        learningStyle?: string;
+        toneOfChoice?: string;
+        problemSolvingStyle?: string;
+        customFields?: { [key: string]: string };
+    };
+    // Comprehensive Profile fields
+    comprehensiveProfile?: {
+        role?: string;
+        aiLikes?: string[];
+        aiDislikes?: string[];
+        customAILikes?: string[];
+        customAIDislikes?: string[];
+        aboutMe?: string;
+        myValues?: string[];
+        mySkills?: string[];
+        howIThink?: string[];
+        myInfluences?: string[];
+        brandVoices?: Array<{ id: string; key: string; value: string }>;
+        audiencePersona?: Array<{ id: string; key: string; value: string }>;
+        dataReferences?: Array<{ id: string; key: string; value: string }>;
+        workExamples?: Array<{ id: string; key: string; value: string }>;
+        miscellaneous?: Array<{ id: string; key: string; value: string }>;
+    };
     correctPassword: (candidatePassword: string) => Promise<boolean>;
     checkPasswordchanged: (JWTTimestamp: number) => boolean;
     getPasswordResetToken: () => string;
@@ -50,6 +85,10 @@ const userSchema = new Schema<IUser>(
             type: String,
             default: ''
         },
+        projects: {
+            type: [String],
+            default: ['My Prompts']
+        },
         passwordResetToken: String,
         passwordResetTokenExpires: Date,
         lastChangedPassword: Date,
@@ -57,6 +96,80 @@ const userSchema = new Schema<IUser>(
             type: String,
             default: undefined,
             select: false
+        },
+        identity: {
+            role: { type: String, default: '' },
+            goals: { type: String, default: '' },
+            values: { type: String, default: '' },
+            skills: { type: String, default: '' },
+            customFields: {
+                type: Map,
+                of: String,
+                default: {}
+            }
+        },
+        preferences: {
+            preferredOutput: { type: String, default: '' },
+            learningStyle: { type: String, default: '' },
+            toneOfChoice: { type: String, default: '' },
+            problemSolvingStyle: { type: String, default: '' },
+            customFields: {
+                type: Map,
+                of: String,
+                default: {}
+            }
+        },
+        comprehensiveProfile: {
+            role: { type: String, default: '' },
+            aiLikes: { type: [String], default: [] },
+            aiDislikes: { type: [String], default: [] },
+            customAILikes: { type: [String], default: [] },
+            customAIDislikes: { type: [String], default: [] },
+            aboutMe: { type: String, default: '' },
+            myValues: { type: [String], default: [] },
+            mySkills: { type: [String], default: [] },
+            howIThink: { type: [String], default: [] },
+            myInfluences: { type: [String], default: [] },
+            brandVoices: {
+                type: [{
+                    id: String,
+                    key: String,
+                    value: String
+                }],
+                default: []
+            },
+            audiencePersona: {
+                type: [{
+                    id: String,
+                    key: String,
+                    value: String
+                }],
+                default: []
+            },
+            dataReferences: {
+                type: [{
+                    id: String,
+                    key: String,
+                    value: String
+                }],
+                default: []
+            },
+            workExamples: {
+                type: [{
+                    id: String,
+                    key: String,
+                    value: String
+                }],
+                default: []
+            },
+            miscellaneous: {
+                type: [{
+                    id: String,
+                    key: String,
+                    value: String
+                }],
+                default: []
+            }
         },
     },
     {

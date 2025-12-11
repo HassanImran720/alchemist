@@ -5,18 +5,20 @@ import { withAuth, AuthenticatedUser } from "../../../../lib/auth";
 import { buildFormatInstruction, getFormatTemplate } from "../../../../lib/formatTemplates";
 
 type Body = {
-  mode: "guided" | "flow";
+  // mode: "guided" | "flow"; // ❌ Removed - using category instead
+  category?: string; // ✅ The selected category (General, Content Creation, Sales, etc.)
+  selectedCategory?: string; // Keep for backward compatibility
   task?: string;
   fields?: Record<string, string>;
   contextData?: Record<string, any>;
   references?: string;
   insertReferences?: string;
+  referencesUsage?: string;
   format?: string;
   toneData?: string[];
   promptStructure?: string;
   length?: string;
   model?: string;
-  selectedCategory?: string; // For guided mode - the selected category from dropdown
   includeEmojis?: boolean; // For emoji inclusion
 };
 
@@ -27,22 +29,30 @@ async function generateHandler(req: NextRequest, user: AuthenticatedUser) {
     console.log("🟢 Incoming Request Body:", JSON.stringify(body, null, 2));
     console.log("👤 Authenticated User:", user.email);
 
-    if (!body.mode) {
-      console.error("❌ Error: mode is required");
-      return NextResponse.json({ error: "mode is required" }, { status: 400 });
+    // Get category - could be in category or selectedCategory field
+    const category = body.category || body.selectedCategory || "";
+
+    if (!category) {
+      console.error("❌ Error: category is required");
+      return NextResponse.json({ error: "category is required" }, { status: 400 });
     }
 
-    // FLOW MODE
-    if (body.mode === "flow") {
+    console.log("📂 Selected Category:", category);
+
+    // GENERAL CATEGORY (freeform text)
+    if (category === "General") {
       const task = body.task || "";
+      const contextDescription = body.contextData?.dynamicFields?.['Context Description'] || "";
       const format = body.format || "";
-      const tone = (body.toneData || []).join(", ");
+      // ✅ toneData now contains full textarea content (tones + brand voice combined)
+      const tone = (body.toneData && body.toneData.length > 0) ? body.toneData[0] : "Professional";
       const length = body.length || "";
-      const promptStructure = body.promptStructure || "aichemist-formula";
+  const promptStructure = body.promptStructure || "plain-text"; // ✅ default to plain-text to match UI
       const includeEmojis = body.includeEmojis || false;
 
-      console.log("🌀 Flow Mode - Building Structured Prompt with:", {
+      console.log("🌀 General Category - Building Freeform Prompt with:", {
         task,
+        contextDescription,
         format,
         tone,
         length,
@@ -50,9 +60,9 @@ async function generateHandler(req: NextRequest, user: AuthenticatedUser) {
         includeEmojis
       });
 
-      // Build structured prompt for flow mode
+      // Build structured prompt for General category (similar to old flow mode)
       const structuredPrompt = buildFlowModePrompt({
-        task,
+        task: contextDescription, // Use the freeform context as the task
         format,
         tone,
         length,
@@ -60,31 +70,51 @@ async function generateHandler(req: NextRequest, user: AuthenticatedUser) {
         includeEmojis,
       });
 
-      console.log("📜 Flow Mode Structured Prompt Generated:\n", structuredPrompt);
+      console.log("📜 General Category Structured Prompt Generated:\n", structuredPrompt);
 
-      // Return the structured prompt directly (no refinement needed as it's already structured)
+      // Return the structured prompt directly
       return NextResponse.json({ prompt: structuredPrompt });
     }
 
-  // GUIDED MODE
+  // ALL OTHER CATEGORIES (guided mode with structured fields)
   const task = body.task || "";
     const fields =
       (body.contextData && body.contextData.dynamicFields) ||
       body.fields ||
       body.contextData ||
       {};
+    
+    // Also include custom fields from customFieldsByGroup
+    const customFieldsByGroup = body.contextData?.customFieldsByGroup || {};
+    const customFieldsFlattened: Record<string, string> = {};
+    Object.entries(customFieldsByGroup).forEach(([group, fieldArray]) => {
+      (fieldArray as string[]).forEach((fieldValue, index) => {
+        if (fieldValue && fieldValue.trim()) {
+          // Use the actual field value as the label instead of generic "Custom Field X"
+          const fieldLabel = fieldValue.length > 50 ? `${fieldValue.substring(0, 47)}...` : fieldValue;
+          customFieldsFlattened[`${group} - ${fieldLabel}`] = fieldValue;
+        }
+      });
+    });
+    
+    // Merge custom fields with regular fields
+    const allFields = { ...fields, ...customFieldsFlattened };
+    
     const insertRefs = body.insertReferences || body.references || "";
+    const referencesUsage = body.referencesUsage || "";
     const format = body.format || "";
-    const tone = (body.toneData || []).join(", ");
-    const promptStructure = body.promptStructure || "aichemist-formula";
+    // ✅ toneData now contains full textarea content (tones + brand voice combined)
+    const tone = (body.toneData && body.toneData.length > 0) ? body.toneData[0] : "Professional";
+  const promptStructure = body.promptStructure || "plain-text"; // ✅ default to plain-text to match UI
     const length = body.length || "";
     const selectedCategory = body.selectedCategory || "";
     const includeEmojis = body.includeEmojis || false;
 
     console.log("🧩 Building Structured Guided Prompt with:", {
       task,
-      fields,
+      fields: allFields,
       insertRefs,
+      referencesUsage,
       format,
       tone,
       promptStructure,
@@ -97,8 +127,9 @@ async function generateHandler(req: NextRequest, user: AuthenticatedUser) {
     const structuredPrompt = buildGuidedPrompt({
       selectedCategory,
       task,
-      fields,
+      fields: allFields,
       references: insertRefs,
+      referencesUsage,
       format,
       tone,
       promptStructure,

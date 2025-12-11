@@ -6,7 +6,7 @@ interface Props {
 }
 
 const DefineTaskStep: React.FC<Props> = ({ taskDescription, setTaskDescription }) => (
-  <div className="rounded-lg border-[0.5px] border-gold/30 p-6 mb-6">
+  <div className=" border-[0.5px] border-gold/30 p-6 mb-6">
     <div className="flex items-center mb-4">
       <div className="bg-gold text-ivory rounded-full w-8 h-8 flex items-center justify-center font-semibold mr-3">
         1

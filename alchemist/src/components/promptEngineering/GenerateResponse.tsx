@@ -1,24 +1,26 @@
 "use client";
 import React, { useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { getAvailableModels, isModelAvailable } from "../../lib/aiModels";
+import { getModelsInOrder, isModelAvailable } from "../../lib/aiModels";
 import { usePromptEng } from "../../context/PromptEngContext";
 
 interface GenerateResponseProps {
   generatedPrompt: string;
   // Parent will provide a handler that performs the network call and returns the response text
   onGenerateResponse: (prompt?: string) => Promise<string | undefined>;
+  onOpenManualEdit?: () => void; // ✅ NEW: callback to open manual edit modal
 }
 
 const GenerateResponse: React.FC<GenerateResponseProps> = ({
   generatedPrompt,
   onGenerateResponse,
+  onOpenManualEdit,
 }) => {
   const { selectedModel, setSelectedModel } = usePromptEng();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>("");
 
-  const availableModels = getAvailableModels();
+  const availableModels = getModelsInOrder();
 
   const handleGenerate = async () => {
     try {
@@ -34,6 +36,15 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
       if (!selectedModel) {
         setError("Please select a model to generate response");
         setLoading(false);
+        return;
+      }
+
+      // ✅ Handle manual mode - open edit modal instead of calling AI
+      if (selectedModel === "manual") {
+        setLoading(false);
+        if (onOpenManualEdit) {
+          onOpenManualEdit();
+        }
         return;
       }
 
@@ -86,24 +97,25 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
           required
         >
           <option value="">Choose a model...</option>
+          {/* Manual option (top) - exact wording per request */}
+          <option value="manual">Manual (Use Personal Model)</option>
           {availableModels.map((model) => (
-            <option key={model.id} value={model.id}>
-              {model.name} {model.available ? '' : '(Coming Soon)'}
+            <option key={model.id} value={model.id} disabled={!model.available}>
+              {model.name}{!model.available ? ' - Coming Soon' : ''}
             </option>
           ))}
-          {/* Show unavailable models with coming soon message */}
-          <option value="claude" disabled>
-            Claude (Anthropic) - Coming Soon
-          </option>
-          <option value="perplexity" disabled>
-            Perplexity AI - Coming Soon
-          </option>
         </select>
         
         {/* Show availability message */}
-        {selectedModel && !isModelAvailable(selectedModel) && (
+        {selectedModel && !isModelAvailable(selectedModel) && selectedModel !== "manual" && (
           <p className="mt-1 text-sm text-orange-600">
-            This model is coming soon and not available yet. Please select ChatGPT for now.
+            {/* This model is coming soon and not available yet. Please select ChatGPT for now. */}
+          </p>
+        )}
+        {/* Show manual mode message */}
+        {selectedModel === "manual" && (
+          <p className="mt-1 text-sm text-blue-600">
+            💡 Manual mode: Click "Add Manual Response" to paste your own response and save AI tokens.
           </p>
         )}
       </div>
@@ -114,13 +126,15 @@ const GenerateResponse: React.FC<GenerateResponseProps> = ({
           loading ? "bg-white text-gold border border-gold/30" : "bg-gold text-white"
         }`}
         onClick={handleGenerate}
-        disabled={loading || !generatedPrompt || !selectedModel || !isModelAvailable(selectedModel)}
+        disabled={loading || !generatedPrompt || !selectedModel}
       >
         {loading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin text-gold" />
             <span className="text-gold">Generating Response...</span>
           </>
+        ) : selectedModel === "manual" ? (
+          "Add Manual Response"
         ) : (
           "Generate Response"
         )}

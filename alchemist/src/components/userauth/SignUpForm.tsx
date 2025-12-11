@@ -1,11 +1,11 @@
+"use client";
+
 // Fix for window.google TypeScript error
 declare global {
   interface Window {
     google: any;
   }
 }
-
-"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
